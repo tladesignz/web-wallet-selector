@@ -193,9 +193,14 @@ async function fetchFavicon(url: string, timeout: number = 3000): Promise<string
 	}
 }
 
+export type IconOption = {
+	type: string;
+	value: string;
+};
+
 type WalletIconOptionsResult = {
 	favicon: string | null;
-	generated: { type: string; value: string }[];
+	generated: IconOption[];
 };
 
 /**

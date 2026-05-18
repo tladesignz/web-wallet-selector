@@ -2,34 +2,59 @@
  * Options page script for Wallet Companion extension
  */
 
+import type { GetSettingsResponse } from '@shared/schemas/messages';
+import { InboundMessages } from '@shared/schemas/messages';
+import type { Wallet } from '@shared/schemas/resources';
 import {
 	fetchFavicon,
 	generateGeometricIcon,
 	generateIdenticon,
 	generateInitialAvatar,
+	type IconOption,
 	isIconUrl,
 	svgToDataUrl,
 } from './utils/icons';
+import { sendMessage } from './utils/messaging';
 
-// Cross-browser compatibility
+// ============================================================================
+// Types
+// ============================================================================
+
+type FaviconElements = {
+	section: HTMLElement;
+	img: HTMLImageElement;
+	status: HTMLElement;
+};
+
+type ExportConfig = {
+	version: string;
+	exportDate: string;
+	wallets: Wallet[];
+	settings: GetSettingsResponse;
+};
+
+type NotificationType = 'success' | 'error' | 'warning' | 'info';
+
+// Cross-browser compatibility (storage still needed for direct stats clear)
 const storage = typeof browser !== 'undefined' ? browser.storage : chrome.storage;
-const runtime = typeof browser !== 'undefined' ? browser.runtime : chrome.runtime;
 
 // wwWallet preset providers
-const WWWALLET_PRESETS = [
+const WWWALLET_PRESETS: readonly Wallet[] = [
 	{
+		id: 'preset-wwwallet-demo',
 		name: 'wwWallet Demo',
 		url: 'https://demo.wwwallet.org',
 		icon: '<svg width="24" height="24" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="1024" height="1024" rx="512" fill="white"/><path fill-rule="evenodd" clip-rule="evenodd" d="M374.192 204.43C398.46 362.058 398.46 362.058 556.087 386.441C398.514 410.701 398.46 411.056 374.217 568.404C374.208 568.458 374.2 568.513 374.192 568.568C349.808 410.825 349.808 410.825 192.181 386.441C349.808 362.058 349.808 362.058 374.192 204.43ZM386.441 658.938C662.636 616.18 662.636 616.18 705.394 339.87C746.997 609.13 748.037 616.064 1003.55 655.702C1016.84 610.055 1024 561.865 1024 512.058C1024 229.161 794.839 0 511.942 0C229.161 0 0 229.161 0 512.058C0 794.839 229.161 1024 511.942 1024C742.49 1024 937.328 871.804 1001.58 662.405C747.921 701.696 746.881 709.785 705.394 977.775C662.636 701.58 662.636 701.58 386.441 658.938Z" fill="#1C4587"/></svg>',
 		color: '#1C4587',
 		description: 'Official wwWallet demonstration instance',
 		protocols: ['openid4vp', 'openid4vp-v1-unsigned', 'openid4vp-v1-signed'],
+		enabled: true,
 		preset: true,
 	},
 ];
 
-let wallets = [];
-let settings = {
+let wallets: Wallet[] = [];
+let settings: GetSettingsResponse = {
 	enabled: true,
 	developerMode: false,
 	stats: { interceptCount: 0, walletUses: {} },
@@ -47,10 +72,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 /**
  * Load wallets and settings from storage
  */
-async function loadData() {
+async function loadData(): Promise<void> {
 	try {
-		const walletsResponse = await runtime.sendMessage({ type: 'GET_WALLETS' });
-		const settingsResponse = await runtime.sendMessage({ type: 'GET_SETTINGS' });
+		const walletsResponse = await sendMessage({ type: InboundMessages.GET_WALLETS });
+		const settingsResponse = await sendMessage({ type: InboundMessages.GET_SETTINGS });
 
 		wallets = walletsResponse.wallets || [];
 		settings = settingsResponse || {
@@ -67,44 +92,72 @@ async function loadData() {
 /**
  * Setup all event listeners
  */
-function setupEventListeners() {
+function setupEventListeners(): void {
 	// Tab switching
-	document.querySelectorAll('.tab-btn').forEach((tab) => {
-		tab.addEventListener('click', function () {
-			switchTab(this.dataset.tab);
+	document.querySelectorAll<HTMLElement>('.tab-btn').forEach((tab) => {
+		tab.addEventListener('click', () => {
+			const tabName = tab.dataset.tab;
+			if (tabName) switchTab(tabName);
 		});
 	});
 
 	// Add wallet button
-	document.getElementById('add-wallet-btn').addEventListener('click', () => {
-		switchTab('add');
-	});
+	const addWalletBtn = document.getElementById('add-wallet-btn');
+	if (addWalletBtn) {
+		addWalletBtn.addEventListener('click', () => {
+			switchTab('add');
+		});
+	}
 
 	// Add wallet form
-	document.getElementById('add-wallet-form').addEventListener('submit', handleAddWallet);
+	const addWalletForm = document.getElementById('add-wallet-form');
+	if (addWalletForm) {
+		addWalletForm.addEventListener('submit', handleAddWallet);
+	}
 
 	// Edit modal
-	document.getElementById('delete-edit').addEventListener('click', handleDeleteEdit);
-	document.getElementById('cancel-edit').addEventListener('click', closeEditModal);
-	document.getElementById('close-edit').addEventListener('click', closeEditModal);
-	document.getElementById('save-edit').addEventListener('click', handleSaveEdit);
-	document
-		.getElementById('edit-wallet-enabled')
-		.addEventListener('change', updateWalletStatusLabel);
+	const deleteEdit = document.getElementById('delete-edit');
+	if (deleteEdit) deleteEdit.addEventListener('click', handleDeleteEdit);
+
+	const cancelEdit = document.getElementById('cancel-edit');
+	if (cancelEdit) cancelEdit.addEventListener('click', closeEditModal);
+
+	const closeEdit = document.getElementById('close-edit');
+	if (closeEdit) closeEdit.addEventListener('click', closeEditModal);
+
+	const saveEdit = document.getElementById('save-edit');
+	if (saveEdit) saveEdit.addEventListener('click', handleSaveEdit);
+
+	const editWalletEnabled = document.getElementById('edit-wallet-enabled');
+	if (editWalletEnabled) {
+		editWalletEnabled.addEventListener('change', updateWalletStatusLabel);
+	}
 
 	// Settings
-	document.getElementById('extension-enabled').addEventListener('change', handleToggleEnabled);
-	document.getElementById('developer-mode').addEventListener('change', handleToggleDeveloperMode);
-	document.getElementById('clear-stats').addEventListener('click', handleClearStats);
-	document.getElementById('export-config').addEventListener('click', handleExportConfig);
-	document.getElementById('import-config').addEventListener('change', handleImportConfig);
+	const extensionEnabled = document.getElementById('extension-enabled');
+	if (extensionEnabled) extensionEnabled.addEventListener('change', handleToggleEnabled);
+
+	const developerMode = document.getElementById('developer-mode');
+	if (developerMode) developerMode.addEventListener('change', handleToggleDeveloperMode);
+
+	const clearStats = document.getElementById('clear-stats');
+	if (clearStats) clearStats.addEventListener('click', handleClearStats);
+
+	const exportConfig = document.getElementById('export-config');
+	if (exportConfig) exportConfig.addEventListener('click', handleExportConfig);
+
+	const importConfig = document.getElementById('import-config');
+	if (importConfig) importConfig.addEventListener('change', handleImportConfig);
 
 	// Close modal on outside click
-	document.getElementById('edit-modal').addEventListener('click', function (e) {
-		if (e.target === this) {
-			closeEditModal();
-		}
-	});
+	const editModal = document.getElementById('edit-modal');
+	if (editModal) {
+		editModal.addEventListener('click', (e) => {
+			if (e.target === editModal) {
+				closeEditModal();
+			}
+		});
+	}
 }
 
 /**
@@ -114,9 +167,10 @@ function setupIconSelectors() {
 	// Add form icon selector - emoji buttons
 	const iconGrid = document.getElementById('icon-emoji-grid');
 	if (iconGrid) {
-		iconGrid.querySelectorAll('.emoji-btn').forEach((btn) => {
-			btn.addEventListener('click', function () {
-				selectIcon('emoji', this.dataset.emoji);
+		iconGrid.querySelectorAll<HTMLElement>('.emoji-btn').forEach((btn) => {
+			btn.addEventListener('click', () => {
+				const emoji = btn.dataset.emoji;
+				if (emoji) selectIcon('emoji', emoji);
 			});
 		});
 	}
@@ -126,7 +180,7 @@ function setupIconSelectors() {
 	if (faviconBtn) {
 		faviconBtn.addEventListener('click', () => {
 			const faviconImg = document.getElementById('favicon-img');
-			if (faviconImg?.src) {
+			if (faviconImg instanceof HTMLImageElement && faviconImg.src) {
 				selectIcon('favicon', faviconImg.src);
 			}
 		});
@@ -135,9 +189,10 @@ function setupIconSelectors() {
 	// Edit form icon selector - emoji buttons
 	const editIconGrid = document.getElementById('edit-icon-emoji-grid');
 	if (editIconGrid) {
-		editIconGrid.querySelectorAll('.emoji-btn').forEach((btn) => {
-			btn.addEventListener('click', function () {
-				selectEditIcon('emoji', this.dataset.emoji);
+		editIconGrid.querySelectorAll<HTMLElement>('.emoji-btn').forEach((btn) => {
+			btn.addEventListener('click', () => {
+				const emoji = btn.dataset.emoji;
+				if (emoji) selectEditIcon('emoji', emoji);
 			});
 		});
 	}
@@ -147,7 +202,7 @@ function setupIconSelectors() {
 	if (editFaviconBtn) {
 		editFaviconBtn.addEventListener('click', () => {
 			const faviconImg = document.getElementById('edit-favicon-img');
-			if (faviconImg?.src) {
+			if (faviconImg instanceof HTMLImageElement && faviconImg.src) {
 				selectEditIcon('favicon', faviconImg.src);
 			}
 		});
@@ -183,29 +238,55 @@ function setupIconSelectors() {
 /**
  * Debounce helper
  */
-function debounce(func, wait) {
-	let timeout;
-	return function executedFunction(...args) {
+function debounce<T extends (...args: unknown[]) => void>(func: T, wait: number): T {
+	let timeout: ReturnType<typeof setTimeout> | undefined;
+	return function executedFunction(...args: unknown[]) {
 		const later = () => {
 			clearTimeout(timeout);
 			func(...args);
 		};
 		clearTimeout(timeout);
 		timeout = setTimeout(later, wait);
-	};
+	} as T;
 }
 
 /**
  * Handle URL input change - fetch favicon and generate icons
  */
-async function handleUrlChange() {
-	const url = document.getElementById('wallet-url').value.trim();
-	const name = document.getElementById('wallet-name').value.trim();
+async function handleUrlChange(): Promise<void> {
+	const urlInput = document.getElementById('wallet-url');
+	const nameInput = document.getElementById('wallet-name');
+
+	if (!(urlInput instanceof HTMLInputElement) || !(nameInput instanceof HTMLInputElement)) {
+		console.error('handleUrlChange: Missing required form inputs', { urlInput, nameInput });
+		return;
+	}
+
+	const url = urlInput.value.trim();
+	const name = nameInput.value.trim();
 
 	if (!url) return;
 
 	const iconOptions = document.getElementById('icon-options');
 	const generatedIconsContainer = document.getElementById('generated-icons');
+	const faviconSection = document.getElementById('favicon-section');
+	const faviconImg = document.getElementById('favicon-img');
+	const faviconStatus = document.getElementById('favicon-status');
+
+	if (
+		!generatedIconsContainer ||
+		!faviconSection ||
+		!(faviconImg instanceof HTMLImageElement) ||
+		!faviconStatus
+	) {
+		console.error('handleUrlChange: Missing icon elements', {
+			generatedIconsContainer,
+			faviconSection,
+			faviconImg,
+			faviconStatus,
+		});
+		return;
+	}
 
 	// Generate and render icons
 	const generatedIcons = generateIconsArray(url, name);
@@ -218,26 +299,39 @@ async function handleUrlChange() {
 	await fetchAndDisplayFavicon(
 		url,
 		{
-			section: document.getElementById('favicon-section'),
-			img: document.getElementById('favicon-img'),
-			status: document.getElementById('favicon-status'),
+			section: faviconSection,
+			img: faviconImg,
+			status: faviconStatus,
 		},
 		(favicon) => selectIcon('favicon', favicon),
 	);
 
-	iconOptions.classList.remove('_hidden');
+	if (iconOptions) iconOptions.classList.remove('_hidden');
 }
 
 /**
  * Handle name input change - regenerate icons
  */
-function handleNameChange() {
-	const url = document.getElementById('wallet-url').value.trim();
-	const name = document.getElementById('wallet-name').value.trim();
+function handleNameChange(): void {
+	const urlInput = document.getElementById('wallet-url');
+	const nameInput = document.getElementById('wallet-name');
+
+	if (!(urlInput instanceof HTMLInputElement) || !(nameInput instanceof HTMLInputElement)) {
+		console.error('handleNameChange: Missing required form inputs', { urlInput, nameInput });
+		return;
+	}
+
+	const url = urlInput.value.trim();
+	const name = nameInput.value.trim();
 
 	if (!name) return;
 
 	const generatedIconsContainer = document.getElementById('generated-icons');
+	if (!generatedIconsContainer) {
+		console.error('handleNameChange: Missing generated-icons container');
+		return;
+	}
+
 	const generatedIcons = generateIconsArray(url, name);
 	renderIconButtons(generatedIconsContainer, generatedIcons, selectIcon);
 }
@@ -245,26 +339,39 @@ function handleNameChange() {
 /**
  * Generate icon options for the edit form
  */
-async function generateEditIconOptions(url, name, currentIcon, currentIconType) {
+async function generateEditIconOptions(
+	url: string,
+	name: string,
+	currentIcon: string | null | undefined,
+	currentIconType: string | null | undefined,
+): Promise<void> {
 	const iconOptions = document.getElementById('edit-icon-options');
 	const generatedIconsContainer = document.getElementById('edit-generated-icons');
 	const preview = document.getElementById('edit-icon-preview');
+	const faviconSection = document.getElementById('edit-favicon-section');
+	const faviconImg = document.getElementById('edit-favicon-img');
+	const faviconStatus = document.getElementById('edit-favicon-status');
+
+	if (!generatedIconsContainer) {
+		console.error('generateEditIconOptions: Missing edit-generated-icons container');
+		return;
+	}
 
 	// Generate and render icons
 	const generatedIcons = generateIconsArray(url, name);
 	renderIconButtons(generatedIconsContainer, generatedIcons, selectEditIcon);
 
 	// Show icon options
-	iconOptions.classList.remove('_hidden');
+	if (iconOptions) iconOptions.classList.remove('_hidden');
 
 	// Fetch favicon in background
-	if (url) {
+	if (url && faviconSection && faviconImg instanceof HTMLImageElement && faviconStatus) {
 		await fetchAndDisplayFavicon(
 			url,
 			{
-				section: document.getElementById('edit-favicon-section'),
-				img: document.getElementById('edit-favicon-img'),
-				status: document.getElementById('edit-favicon-status'),
+				section: faviconSection,
+				img: faviconImg,
+				status: faviconStatus,
 			},
 			(favicon) => {
 				// If current icon is favicon type, select it
@@ -282,7 +389,7 @@ async function generateEditIconOptions(url, name, currentIcon, currentIconType) 
 		} else if (currentIconType && currentIconType !== 'favicon') {
 			// It's a generated icon type - select matching generated icon
 			selectEditIcon(currentIconType, currentIcon);
-		} else if (currentIconType !== 'favicon') {
+		} else if (currentIconType !== 'favicon' && preview) {
 			// Default: show the current icon in preview but don't select anything
 			if (isIconUrl(currentIcon)) {
 				preview.innerHTML = `<img src="${currentIcon}" alt="Wallet icon">`;
@@ -296,14 +403,30 @@ async function generateEditIconOptions(url, name, currentIcon, currentIconType) 
 /**
  * Handle URL change in edit form - regenerate icons
  */
-async function handleEditUrlChange() {
-	const url = document.getElementById('edit-wallet-url').value.trim();
-	const name = document.getElementById('edit-wallet-name').value.trim();
+async function handleEditUrlChange(): Promise<void> {
+	const urlInput = document.getElementById('edit-wallet-url');
+	const nameInput = document.getElementById('edit-wallet-name');
+
+	if (!(urlInput instanceof HTMLInputElement) || !(nameInput instanceof HTMLInputElement)) {
+		console.error('handleEditUrlChange: Missing required form inputs', { urlInput, nameInput });
+		return;
+	}
+
+	const url = urlInput.value.trim();
+	const name = nameInput.value.trim();
 
 	if (!url) return;
 
 	const generatedIconsContainer = document.getElementById('edit-generated-icons');
 	const iconOptions = document.getElementById('edit-icon-options');
+	const faviconSection = document.getElementById('edit-favicon-section');
+	const faviconImg = document.getElementById('edit-favicon-img');
+	const faviconStatus = document.getElementById('edit-favicon-status');
+
+	if (!generatedIconsContainer) {
+		console.error('handleEditUrlChange: Missing edit-generated-icons container');
+		return;
+	}
 
 	// Generate and render icons
 	const generatedIcons = generateIconsArray(url, name);
@@ -313,29 +436,44 @@ async function handleEditUrlChange() {
 	selectEditIcon(generatedIcons[0].type, generatedIcons[0].value);
 
 	// Fetch favicon in background
-	await fetchAndDisplayFavicon(
-		url,
-		{
-			section: document.getElementById('edit-favicon-section'),
-			img: document.getElementById('edit-favicon-img'),
-			status: document.getElementById('edit-favicon-status'),
-		},
-		(favicon) => selectEditIcon('favicon', favicon),
-	);
+	if (faviconSection && faviconImg instanceof HTMLImageElement && faviconStatus) {
+		await fetchAndDisplayFavicon(
+			url,
+			{
+				section: faviconSection,
+				img: faviconImg,
+				status: faviconStatus,
+			},
+			(favicon) => selectEditIcon('favicon', favicon),
+		);
+	}
 
-	iconOptions.classList.remove('_hidden');
+	if (iconOptions) iconOptions.classList.remove('_hidden');
 }
 
 /**
  * Handle name change in edit form - regenerate icons
  */
-function handleEditNameChange() {
-	const url = document.getElementById('edit-wallet-url').value.trim();
-	const name = document.getElementById('edit-wallet-name').value.trim();
+function handleEditNameChange(): void {
+	const urlInput = document.getElementById('edit-wallet-url');
+	const nameInput = document.getElementById('edit-wallet-name');
+
+	if (!(urlInput instanceof HTMLInputElement) || !(nameInput instanceof HTMLInputElement)) {
+		console.error('handleEditNameChange: Missing required form inputs', { urlInput, nameInput });
+		return;
+	}
+
+	const url = urlInput.value.trim();
+	const name = nameInput.value.trim();
 
 	if (!name) return;
 
 	const generatedIconsContainer = document.getElementById('edit-generated-icons');
+	if (!generatedIconsContainer) {
+		console.error('handleEditNameChange: Missing edit-generated-icons container');
+		return;
+	}
+
 	const generatedIcons = generateIconsArray(url, name);
 	renderIconButtons(generatedIconsContainer, generatedIcons, selectEditIcon);
 }
@@ -343,9 +481,9 @@ function handleEditNameChange() {
 /**
  * Switch between tabs
  */
-function switchTab(tabName) {
+function switchTab(tabName: string): void {
 	// Update tab buttons
-	document.querySelectorAll('.tab-btn').forEach((tab) => {
+	document.querySelectorAll<HTMLElement>('.tab-btn').forEach((tab) => {
 		tab.classList.toggle('-active', tab.dataset.tab === tabName);
 	});
 
@@ -368,8 +506,12 @@ function renderAll() {
 /**
  * Render wallets list
  */
-function renderWallets() {
+function renderWallets(): void {
 	const container = document.getElementById('wallets-container');
+	if (!container) {
+		console.error('renderWallets: Missing wallets-container');
+		return;
+	}
 
 	if (wallets.length === 0) {
 		container.innerHTML = `
@@ -383,9 +525,12 @@ function renderWallets() {
       </div>
     `;
 		// Attach click handler for empty state button
-		container.querySelector('.empty-state-add-btn').addEventListener('click', () => {
-			switchTab('add');
-		});
+		const addBtn = container.querySelector('.empty-state-add-btn');
+		if (addBtn) {
+			addBtn.addEventListener('click', () => {
+				switchTab('add');
+			});
+		}
 		return;
 	}
 
@@ -403,18 +548,31 @@ function renderWallets() {
   `;
 
 	// Attach click handler for add another wallet card
-	container.querySelector('.add-card').addEventListener('click', () => {
-		switchTab('add');
-	});
+	const addCard = container.querySelector('.add-card');
+	if (addCard) {
+		addCard.addEventListener('click', () => {
+			switchTab('add');
+		});
+	}
 
 	// Attach event listeners to wallet actions
-	wallets.forEach((wallet, _index) => {
+	wallets.forEach((wallet) => {
 		const card = container.querySelector(`[data-wallet-id="${wallet.id}"]`);
 		if (card) {
-			card.querySelector('.btn-edit').addEventListener('click', () => openEditModal(wallet));
-			card
-				.querySelector('.toggle-wallet')
-				.addEventListener('change', (e) => handleToggleWallet(wallet.id, e.target.checked));
+			const editBtn = card.querySelector('.btn-edit');
+			if (editBtn) {
+				editBtn.addEventListener('click', () => openEditModal(wallet));
+			}
+
+			const toggleWallet = card.querySelector('.toggle-wallet');
+			if (toggleWallet) {
+				toggleWallet.addEventListener('change', (e) => {
+					const target = e.target;
+					if (target instanceof HTMLInputElement) {
+						handleToggleWallet(wallet.id, target.checked);
+					}
+				});
+			}
 		}
 	});
 }
@@ -422,7 +580,7 @@ function renderWallets() {
 /**
  * Render a single wallet card
  */
-function renderWalletCard(wallet) {
+function renderWalletCard(wallet: Wallet): string {
 	const uses = settings.stats.walletUses[wallet.id] || 0;
 	const isDefault = wallets.findIndex((w) => w.id === wallet.id) === 0;
 
@@ -438,7 +596,7 @@ function renderWalletCard(wallet) {
 	}
 
 	// Render icon - handle both emoji and image icons
-	let iconHtml;
+	let iconHtml: string;
 	let icon = wallet.icon;
 
 	// If icon is missing or is the default emoji, generate one dynamically
@@ -502,8 +660,12 @@ function renderWalletCard(wallet) {
 /**
  * Render preset wallets
  */
-function renderPresets() {
+function renderPresets(): void {
 	const container = document.getElementById('preset-wallets');
+	if (!container) {
+		console.error('renderPresets: Missing preset-wallets container');
+		return;
+	}
 
 	container.innerHTML = WWWALLET_PRESETS.map((preset) => {
 		const isAdded = wallets.some((w) => w.url === preset.url);
@@ -524,36 +686,53 @@ function renderPresets() {
 	}).join('');
 
 	// Attach click handlers
-	container.querySelectorAll('.preset-card:not(.-added)').forEach((card) => {
-		card.querySelector('.btn').addEventListener('click', (e) => {
-			e.stopPropagation();
-			const preset = JSON.parse(card.dataset.preset);
-			addPresetWallet(preset);
-		});
+	container.querySelectorAll<HTMLElement>('.preset-card:not(.-added)').forEach((card) => {
+		const btn = card.querySelector('.btn');
+		if (btn) {
+			btn.addEventListener('click', (e) => {
+				e.stopPropagation();
+				const presetData = card.dataset.preset;
+				if (presetData) {
+					const preset = JSON.parse(presetData);
+					addPresetWallet(preset);
+				}
+			});
+		}
 	});
 }
 
 /**
  * Render statistics
  */
-function renderStats() {
-	document.getElementById('total-wallets').textContent = wallets.length;
-	document.getElementById('active-wallets').textContent = wallets.filter((w) => w.enabled).length;
-	document.getElementById('total-requests').textContent = settings.stats.interceptCount || 0;
+function renderStats(): void {
+	const totalWallets = document.getElementById('total-wallets');
+	const activeWallets = document.getElementById('active-wallets');
+	const totalRequests = document.getElementById('total-requests');
+
+	if (totalWallets) totalWallets.textContent = String(wallets.length);
+	if (activeWallets) activeWallets.textContent = String(wallets.filter((w) => w.enabled).length);
+	if (totalRequests) totalRequests.textContent = String(settings.stats.interceptCount || 0);
 }
 
 /**
  * Render settings
  */
-function renderSettings() {
-	document.getElementById('extension-enabled').checked = settings.enabled !== false;
-	document.getElementById('developer-mode').checked = settings.developerMode === true;
+function renderSettings(): void {
+	const extensionEnabled = document.getElementById('extension-enabled');
+	const developerMode = document.getElementById('developer-mode');
+
+	if (extensionEnabled instanceof HTMLInputElement) {
+		extensionEnabled.checked = settings.enabled !== false;
+	}
+	if (developerMode instanceof HTMLInputElement) {
+		developerMode.checked = settings.developerMode === true;
+	}
 }
 
 /**
  * Add preset wallet
  */
-async function addPresetWallet(preset) {
+async function addPresetWallet(preset: Wallet): Promise<void> {
 	// Check if this preset already exists
 	const exists = wallets.some((w) => w.url === preset.url);
 	if (exists) {
@@ -561,7 +740,7 @@ async function addPresetWallet(preset) {
 		return;
 	}
 
-	const wallet = {
+	const wallet: Wallet = {
 		id: generateId(),
 		name: preset.name,
 		url: preset.url,
@@ -583,36 +762,67 @@ async function addPresetWallet(preset) {
 /**
  * Handle add wallet form submission
  */
-async function handleAddWallet(e) {
+async function handleAddWallet(e: Event): Promise<void> {
 	e.preventDefault();
 
-	const wallet = {
+	const nameInput = document.getElementById('wallet-name');
+	const urlInput = document.getElementById('wallet-url');
+	const descInput = document.getElementById('wallet-description');
+	const iconInput = document.getElementById('wallet-icon');
+	const iconTypeInput = document.getElementById('wallet-icon-type');
+	const enabledInput = document.getElementById('wallet-enabled');
+	const protocolsInput = document.getElementById('wallet-protocols');
+
+	if (!(nameInput instanceof HTMLInputElement)) {
+		console.error('handleAddWallet: wallet-name is not an input');
+		return;
+	}
+	if (!(urlInput instanceof HTMLInputElement)) {
+		console.error('handleAddWallet: wallet-url is not an input');
+		return;
+	}
+	if (!(descInput instanceof HTMLInputElement || descInput instanceof HTMLTextAreaElement)) {
+		console.error('handleAddWallet: wallet-description is not an input/textarea');
+		return;
+	}
+	if (!(iconInput instanceof HTMLInputElement)) {
+		console.error('handleAddWallet: wallet-icon is not an input');
+		return;
+	}
+	if (!(enabledInput instanceof HTMLInputElement)) {
+		console.error('handleAddWallet: wallet-enabled is not an input');
+		return;
+	}
+
+	const wallet: Wallet = {
 		id: generateId(),
-		name: document.getElementById('wallet-name').value,
-		url: document.getElementById('wallet-url').value,
-		description: document.getElementById('wallet-description').value,
-		icon: document.getElementById('wallet-icon').value || '🔐',
-		iconType: document.getElementById('wallet-icon-type')?.value || 'emoji',
-		color: '#1C4587', // Auto-assign default color
-		enabled: document.getElementById('wallet-enabled').checked,
+		name: nameInput.value,
+		url: urlInput.value,
+		description: descInput.value,
+		icon: iconInput.value || '🔐',
+		iconType: iconTypeInput instanceof HTMLInputElement ? iconTypeInput.value || 'emoji' : 'emoji',
+		color: '#1C4587',
+		enabled: enabledInput.checked,
 		preset: false,
 	};
 
 	// Add protocols if developer mode is enabled
-	if (settings.developerMode) {
-		const protocolsText = document.getElementById('wallet-protocols').value.trim();
+	if (settings.developerMode && protocolsInput instanceof HTMLTextAreaElement) {
+		const protocolsText = protocolsInput.value.trim();
 		if (protocolsText) {
 			wallet.protocols = protocolsText
 				.split('\n')
-				.map((p) => p.trim())
-				.filter((p) => p.length > 0);
+				.map((p: string) => p.trim())
+				.filter((p: string) => p.length > 0);
 		}
 	}
 
 	wallets.push(wallet);
 	await saveWallets();
 
-	e.target.reset();
+	if (e.target instanceof HTMLFormElement) {
+		e.target.reset();
+	}
 	// Reset icon selector
 	resetIconSelector();
 
@@ -624,7 +834,7 @@ async function handleAddWallet(e) {
 /**
  * Reset the icon selector to default state
  */
-function resetIconSelector() {
+function resetIconSelector(): void {
 	const preview = document.getElementById('icon-preview');
 	const iconOptions = document.getElementById('icon-options');
 	const iconInput = document.getElementById('wallet-icon');
@@ -640,92 +850,140 @@ function resetIconSelector() {
 	// Reset preview
 	if (preview) preview.innerHTML = '<span class="placeholder">?</span>';
 	if (iconOptions) iconOptions.classList.add('_hidden');
-	if (iconInput) iconInput.value = '';
-	if (iconTypeInput) iconTypeInput.value = '';
+	if (iconInput instanceof HTMLInputElement) iconInput.value = '';
+	if (iconTypeInput instanceof HTMLInputElement) iconTypeInput.value = '';
 	if (faviconSection) faviconSection.classList.add('_hidden');
 	if (generatedIcons) generatedIcons.innerHTML = '';
 }
-
 /**
  * Open edit modal
  */
-async function openEditModal(wallet) {
-	document.getElementById('edit-wallet-id').value = wallet.id;
-	document.getElementById('edit-wallet-name').value = wallet.name;
-	document.getElementById('edit-wallet-url').value = wallet.url;
-	document.getElementById('edit-wallet-description').value = wallet.description || '';
-	document.getElementById('edit-wallet-icon').value = wallet.icon || '🔐';
-	document.getElementById('edit-wallet-icon-type').value = wallet.iconType || 'emoji';
-	document.getElementById('edit-wallet-enabled').checked = wallet.enabled;
+async function openEditModal(wallet: Wallet): Promise<void> {
+	const idInput = document.getElementById('edit-wallet-id');
+	const nameInput = document.getElementById('edit-wallet-name');
+	const urlInput = document.getElementById('edit-wallet-url');
+	const descInput = document.getElementById('edit-wallet-description');
+	const iconInput = document.getElementById('edit-wallet-icon');
+	const iconTypeInput = document.getElementById('edit-wallet-icon-type');
+	const enabledInput = document.getElementById('edit-wallet-enabled');
+	const protocolsInput = document.getElementById('edit-wallet-protocols');
+	const modal = document.getElementById('edit-modal');
+
+	if (idInput instanceof HTMLInputElement) idInput.value = wallet.id;
+	if (nameInput instanceof HTMLInputElement) nameInput.value = wallet.name;
+	if (urlInput instanceof HTMLInputElement) urlInput.value = wallet.url;
+	if (descInput instanceof HTMLInputElement || descInput instanceof HTMLTextAreaElement) {
+		descInput.value = wallet.description || '';
+	}
+	if (iconInput instanceof HTMLInputElement) iconInput.value = wallet.icon || '🔐';
+	if (iconTypeInput instanceof HTMLInputElement) iconTypeInput.value = wallet.iconType || 'emoji';
+	if (enabledInput instanceof HTMLInputElement) enabledInput.checked = wallet.enabled;
 	updateWalletStatusLabel();
 
 	// Generate and display icon options
 	await generateEditIconOptions(wallet.url, wallet.name, wallet.icon, wallet.iconType);
 
 	// Populate protocols if developer mode is enabled
-	if (settings.developerMode && wallet.protocols) {
-		document.getElementById('edit-wallet-protocols').value = wallet.protocols.join('\n');
-	} else {
-		document.getElementById('edit-wallet-protocols').value = '';
+	if (settings.developerMode && wallet.protocols && protocolsInput instanceof HTMLTextAreaElement) {
+		protocolsInput.value = wallet.protocols.join('\n');
+	} else if (protocolsInput instanceof HTMLTextAreaElement) {
+		protocolsInput.value = '';
 	}
 
 	// Ensure developer mode UI is updated for the modal
 	updateDeveloperModeUI();
 
-	document.getElementById('edit-modal').classList.add('-active');
+	if (modal) modal.classList.add('-active');
 }
 
 /**
  * Handle delete wallet from edit modal
  */
-async function handleDeleteEdit() {
-	const walletId = document.getElementById('edit-wallet-id').value;
-	await handleRemoveWallet(walletId);
+async function handleDeleteEdit(): Promise<void> {
+	const idInput = document.getElementById('edit-wallet-id');
+	if (!(idInput instanceof HTMLInputElement)) {
+		console.error('handleDeleteEdit: edit-wallet-id is not an input');
+		return;
+	}
+	await handleRemoveWallet(idInput.value);
 	closeEditModal();
 }
 
 /**
  * Update the wallet status label based on toggle state
  */
-function updateWalletStatusLabel() {
-	const enabled = document.getElementById('edit-wallet-enabled').checked;
-	document.getElementById('edit-wallet-status').textContent = enabled ? 'Active' : 'Inactive';
+function updateWalletStatusLabel(): void {
+	const enabledInput = document.getElementById('edit-wallet-enabled');
+	const statusLabel = document.getElementById('edit-wallet-status');
+	if (enabledInput instanceof HTMLInputElement && statusLabel) {
+		statusLabel.textContent = enabledInput.checked ? 'Active' : 'Inactive';
+	}
 }
 
 /**
  * Close edit modal
  */
-function closeEditModal() {
-	document.getElementById('edit-modal').classList.remove('-active');
+function closeEditModal(): void {
+	const modal = document.getElementById('edit-modal');
+	if (modal) modal.classList.remove('-active');
 }
 
 /**
  * Handle save edit
  */
-async function handleSaveEdit() {
-	const walletId = document.getElementById('edit-wallet-id').value;
+async function handleSaveEdit(): Promise<void> {
+	const idInput = document.getElementById('edit-wallet-id');
+	const nameInput = document.getElementById('edit-wallet-name');
+	const urlInput = document.getElementById('edit-wallet-url');
+	const descInput = document.getElementById('edit-wallet-description');
+	const iconInput = document.getElementById('edit-wallet-icon');
+	const iconTypeInput = document.getElementById('edit-wallet-icon-type');
+	const enabledInput = document.getElementById('edit-wallet-enabled');
+	const protocolsInput = document.getElementById('edit-wallet-protocols');
+
+	if (!(idInput instanceof HTMLInputElement)) {
+		console.error('handleSaveEdit: edit-wallet-id is not an input');
+		return;
+	}
+	if (!(nameInput instanceof HTMLInputElement)) {
+		console.error('handleSaveEdit: edit-wallet-name is not an input');
+		return;
+	}
+	if (!(urlInput instanceof HTMLInputElement)) {
+		console.error('handleSaveEdit: edit-wallet-url is not an input');
+		return;
+	}
+	if (!(enabledInput instanceof HTMLInputElement)) {
+		console.error('handleSaveEdit: edit-wallet-enabled is not an input');
+		return;
+	}
+
+	const walletId = idInput.value;
 	const walletIndex = wallets.findIndex((w) => w.id === walletId);
 
 	if (walletIndex === -1) return;
 
-	const updatedWallet = {
+	const updatedWallet: Wallet = {
 		...wallets[walletIndex],
-		name: document.getElementById('edit-wallet-name').value,
-		url: document.getElementById('edit-wallet-url').value,
-		description: document.getElementById('edit-wallet-description').value,
-		icon: document.getElementById('edit-wallet-icon').value || '🔐',
-		iconType: document.getElementById('edit-wallet-icon-type')?.value || 'emoji',
-		enabled: document.getElementById('edit-wallet-enabled').checked,
+		name: nameInput.value,
+		url: urlInput.value,
+		description:
+			descInput instanceof HTMLInputElement || descInput instanceof HTMLTextAreaElement
+				? descInput.value
+				: wallets[walletIndex].description,
+		icon: iconInput instanceof HTMLInputElement ? iconInput.value || '🔐' : '🔐',
+		iconType: iconTypeInput instanceof HTMLInputElement ? iconTypeInput.value || 'emoji' : 'emoji',
+		enabled: enabledInput.checked,
 	};
 
 	// Update protocols if developer mode is enabled
-	if (settings.developerMode) {
-		const protocolsText = document.getElementById('edit-wallet-protocols').value.trim();
+	if (settings.developerMode && protocolsInput instanceof HTMLTextAreaElement) {
+		const protocolsText = protocolsInput.value.trim();
 		if (protocolsText) {
 			updatedWallet.protocols = protocolsText
 				.split('\n')
-				.map((p) => p.trim())
-				.filter((p) => p.length > 0);
+				.map((p: string) => p.trim())
+				.filter((p: string) => p.length > 0);
 		} else {
 			updatedWallet.protocols = [];
 		}
@@ -742,7 +1000,7 @@ async function handleSaveEdit() {
 /**
  * Handle remove wallet
  */
-async function handleRemoveWallet(walletId) {
+async function handleRemoveWallet(walletId: string): Promise<void> {
 	if (!confirm('Are you sure you want to remove this wallet?')) {
 		return;
 	}
@@ -756,7 +1014,7 @@ async function handleRemoveWallet(walletId) {
 /**
  * Handle toggle wallet
  */
-async function handleToggleWallet(walletId, enabled) {
+async function handleToggleWallet(walletId: string, enabled: boolean): Promise<void> {
 	const wallet = wallets.find((w) => w.id === walletId);
 	if (!wallet) return;
 
@@ -769,8 +1027,13 @@ async function handleToggleWallet(walletId, enabled) {
 /**
  * Handle toggle enabled
  */
-async function handleToggleEnabled(e) {
-	settings.enabled = e.target.checked;
+async function handleToggleEnabled(e: Event): Promise<void> {
+	const target = e.target;
+	if (!(target instanceof HTMLInputElement)) {
+		console.error('handleToggleEnabled: event target is not an input');
+		return;
+	}
+	settings.enabled = target.checked;
 	await saveSettings();
 	showNotification(settings.enabled ? 'Extension active' : 'Extension inactive', 'success');
 }
@@ -778,8 +1041,13 @@ async function handleToggleEnabled(e) {
 /**
  * Handle toggle developer mode
  */
-async function handleToggleDeveloperMode(e) {
-	settings.developerMode = e.target.checked;
+async function handleToggleDeveloperMode(e: Event): Promise<void> {
+	const target = e.target;
+	if (!(target instanceof HTMLInputElement)) {
+		console.error('handleToggleDeveloperMode: event target is not an input');
+		return;
+	}
+	settings.developerMode = target.checked;
 	await saveSettings();
 	updateDeveloperModeUI();
 	showNotification(
@@ -828,8 +1096,8 @@ async function handleClearStats() {
 /**
  * Handle export configuration
  */
-function handleExportConfig() {
-	const config = {
+function handleExportConfig(): void {
+	const config: ExportConfig = {
 		version: '1.0',
 		exportDate: new Date().toISOString(),
 		wallets: wallets,
@@ -850,8 +1118,13 @@ function handleExportConfig() {
 /**
  * Handle import configuration
  */
-async function handleImportConfig(e) {
-	const file = e.target.files[0];
+async function handleImportConfig(e: Event): Promise<void> {
+	const target = e.target;
+	if (!(target instanceof HTMLInputElement)) {
+		console.error('handleImportConfig: event target is not an input');
+		return;
+	}
+	const file = target.files?.[0];
 	if (!file) return;
 
 	try {
@@ -867,7 +1140,7 @@ async function handleImportConfig(e) {
 		}
 
 		// Merge with existing wallets, avoiding duplicates
-		config.wallets.forEach((importedWallet) => {
+		config.wallets.forEach((importedWallet: Wallet) => {
 			const exists = wallets.some((w) => w.url === importedWallet.url);
 			if (!exists) {
 				wallets.push({
@@ -885,15 +1158,15 @@ async function handleImportConfig(e) {
 		showNotification('Failed to import configuration', 'error');
 	}
 
-	e.target.value = ''; // Reset file input
+	target.value = ''; // Reset file input
 }
 
 /**
  * Save wallets to storage
  */
-async function saveWallets() {
+async function saveWallets(): Promise<void> {
 	try {
-		await runtime.sendMessage({ type: 'SAVE_WALLETS', wallets: wallets });
+		await sendMessage({ type: InboundMessages.SAVE_WALLETS, wallets: wallets });
 	} catch (error) {
 		console.error('Failed to save wallets:', error);
 		showNotification('Failed to save changes', 'error');
@@ -904,10 +1177,10 @@ async function saveWallets() {
 /**
  * Save settings to storage
  */
-async function saveSettings() {
+async function saveSettings(): Promise<void> {
 	try {
-		await runtime.sendMessage({
-			type: 'SAVE_SETTINGS',
+		await sendMessage({
+			type: InboundMessages.SAVE_SETTINGS,
 			enabled: settings.enabled,
 			developerMode: settings.developerMode,
 		});
@@ -921,14 +1194,14 @@ async function saveSettings() {
 /**
  * Generate unique ID
  */
-function generateId() {
+function generateId(): string {
 	return `wallet-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
 /**
  * Escape HTML to prevent XSS
  */
-function escapeHtml(unsafe) {
+function escapeHtml(unsafe: string | undefined | null): string {
 	if (!unsafe) return '';
 	return unsafe
 		.replace(/&/g, '&amp;')
@@ -940,11 +1213,8 @@ function escapeHtml(unsafe) {
 
 /**
  * Show notification
- *
- * @param {string} message - The message to display
- * @param {'success' | 'error' | 'warning' | 'info'} type - The type of notification
  */
-function showNotification(message, type = 'info') {
+function showNotification(message: string, type: NotificationType = 'info'): void {
 	const types = {
 		success: {
 			title: 'Success!',
@@ -975,13 +1245,16 @@ function showNotification(message, type = 'info') {
     <button class="close" aria-label="Close">&times;</button>
   `;
 
-	toast.querySelector('.close').addEventListener('click', () => {
-		toast.style.animation = 'slideOut 0.3s ease';
-		setTimeout(() => toast.remove(), 300);
-	});
+	const closeBtn = toast.querySelector('.close');
+	if (closeBtn) {
+		closeBtn.addEventListener('click', () => {
+			toast.style.animation = 'slideOut 0.3s ease';
+			setTimeout(() => toast.remove(), 300);
+		});
+	}
 
 	const container = document.getElementById('toast-container');
-	container.appendChild(toast);
+	if (container) container.appendChild(toast);
 
 	setTimeout(() => {
 		toast.style.animation = 'slideOut 0.3s ease';
@@ -995,11 +1268,8 @@ function showNotification(message, type = 'info') {
 
 /**
  * Generate icon options array from URL and name
- * @param {string} url - Wallet URL (used for identicon/geometric generation)
- * @param {string} name - Wallet name (used for initial avatar)
- * @returns {Array<{type: string, value: string}>} Array of icon options
  */
-function generateIconsArray(url, name) {
+function generateIconsArray(url: string, name: string): IconOption[] {
 	const identifier = url || name || 'wallet';
 	const walletName = name || 'Wallet';
 
@@ -1013,11 +1283,12 @@ function generateIconsArray(url, name) {
 
 /**
  * Render icon buttons into a container
- * @param {HTMLElement} container - Container to render buttons into
- * @param {Array<{type: string, value: string}>} icons - Array of icon options
- * @param {function} onSelect - Callback when an icon is selected: (type, value) => void
  */
-function renderIconButtons(container, icons, onSelect) {
+function renderIconButtons(
+	container: HTMLElement,
+	icons: IconOption[],
+	onSelect: (type: string, value: string) => void,
+): void {
 	container.innerHTML = '';
 	icons.forEach((iconData) => {
 		const btn = document.createElement('button');
@@ -1034,11 +1305,12 @@ function renderIconButtons(container, icons, onSelect) {
 
 /**
  * Fetch and display favicon with validation
- * @param {string} url - URL to fetch favicon from
- * @param {Object} elements - DOM elements { section, img, status }
- * @param {function} onSuccess - Callback when favicon loads: (faviconUrl) => void
  */
-async function fetchAndDisplayFavicon(url, elements, onSuccess) {
+async function fetchAndDisplayFavicon(
+	url: string,
+	elements: FaviconElements,
+	onSuccess: (favicon: string) => void,
+): Promise<void> {
 	const { section, img, status } = elements;
 
 	// Reset state
@@ -1073,7 +1345,7 @@ async function fetchAndDisplayFavicon(url, elements, onSuccess) {
  * @param {string} type - Icon type: 'emoji', 'favicon', or generated type
  * @param {string} value - Icon value (emoji char or data URL)
  */
-function selectIconInForm(prefix, type, value) {
+function selectIconInForm(prefix: string, type: string, value: string): void {
 	const preview = document.getElementById(`${prefix}icon-preview`);
 	const iconInput = document.getElementById(`${prefix}wallet-icon`);
 	const iconTypeInput = document.getElementById(`${prefix}wallet-icon-type`);
@@ -1090,18 +1362,27 @@ function selectIconInForm(prefix, type, value) {
 			btn.classList.remove('-selected');
 		});
 
+	if (!preview) {
+		console.error(`selectIconInForm: Missing ${prefix}icon-preview`);
+		return;
+	}
+	if (!(iconInput instanceof HTMLInputElement)) {
+		console.error(`selectIconInForm: ${prefix}wallet-icon is not an input`);
+		return;
+	}
+
 	// Update preview and inputs
 	if (type === 'emoji') {
 		preview.innerHTML = `<span style="font-size: 32px;">${value}</span>`;
 		iconInput.value = value;
-		if (iconTypeInput) iconTypeInput.value = 'emoji';
+		if (iconTypeInput instanceof HTMLInputElement) iconTypeInput.value = 'emoji';
 
 		const emojiBtn = document.querySelector(`${emojiSelector}[data-emoji="${CSS.escape(value)}"]`);
 		if (emojiBtn) emojiBtn.classList.add('-selected');
 	} else if (type === 'favicon') {
 		preview.innerHTML = `<img src="${value}" alt="Wallet icon">`;
 		iconInput.value = value;
-		if (iconTypeInput) iconTypeInput.value = 'favicon';
+		if (iconTypeInput instanceof HTMLInputElement) iconTypeInput.value = 'favicon';
 
 		const faviconBtn = document.getElementById(`${prefix}favicon-option`);
 		if (faviconBtn) faviconBtn.classList.add('-selected');
@@ -1109,7 +1390,7 @@ function selectIconInForm(prefix, type, value) {
 		// Generated icons (identicon, initial, geometric)
 		preview.innerHTML = `<img src="${value}" alt="Wallet icon">`;
 		iconInput.value = value;
-		if (iconTypeInput) iconTypeInput.value = type;
+		if (iconTypeInput instanceof HTMLInputElement) iconTypeInput.value = type;
 
 		const genBtn = document.querySelector(
 			`${generatedSelector}[data-value="${CSS.escape(value)}"]`,
@@ -1119,10 +1400,10 @@ function selectIconInForm(prefix, type, value) {
 }
 
 // Convenience wrappers for backward compatibility
-function selectIcon(type, value) {
+function selectIcon(type: string, value: string): void {
 	selectIconInForm('', type, value);
 }
 
-function selectEditIcon(type, value) {
+function selectEditIcon(type: string, value: string): void {
 	selectIconInForm('edit-', type, value);
 }
