@@ -24,7 +24,7 @@ export class WalletCompanion implements WalletCompanionInterface {
 	}
 
 	get version(): string {
-		return import.meta.env.VITE_EXTENSION_VERSION;
+		return import.meta.env.VITE_APP_VERSION;
 	}
 
 	get isInstalled(): boolean {
