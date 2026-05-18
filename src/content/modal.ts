@@ -90,7 +90,7 @@ function createWalletItem(
 		throw new Error('Failed to create wallet item: missing template elements');
 	}
 
-	icon.appendChild(createWalletIcon(wallet.icon));
+	icon.appendChild(createWalletIcon(wallet.icon ?? undefined));
 	name.textContent = wallet.name;
 	desc.textContent = wallet.description ?? wallet.url ?? 'Digital Identity Wallet';
 
@@ -164,43 +164,3 @@ function showWalletSelector(options: ShowWalletSelectorOptions): void {
 }
 
 window.showWalletSelector = showWalletSelector;
-
-// Event bridge: translate window custom events ↔ showWalletSelector calls
-window.addEventListener('DC_SHOW_WALLET_SELECTOR', (event) => {
-	const { requestId, wallets, requests } = (event as CustomEvent).detail;
-
-	showWalletSelector({
-		wallets,
-		onSelect(wallet) {
-			const selectedRequest =
-				requests.find((req: { protocol: string }) => wallet.protocols?.includes(req.protocol)) ??
-				requests[0];
-
-			window.dispatchEvent(
-				new CustomEvent('DC_WALLET_SELECTED', {
-					detail: {
-						requestId,
-						walletId: wallet.id,
-						wallet,
-						protocol: selectedRequest.protocol,
-						selectedRequest,
-					},
-				}),
-			);
-		},
-		onNative() {
-			window.dispatchEvent(
-				new CustomEvent('DC_CREDENTIALS_RESPONSE', {
-					detail: { requestId, useNative: true },
-				}),
-			);
-		},
-		onCancel() {
-			window.dispatchEvent(
-				new CustomEvent('DC_CREDENTIALS_RESPONSE', {
-					detail: { requestId, error: 'User cancelled the request' },
-				}),
-			);
-		},
-	});
-});

@@ -1,3 +1,4 @@
+import type { RPC } from '@content/rpc';
 import type { WalletCompanionInterface, WalletRegistrationResult } from '@content/types';
 import {
 	type WalletRegistrationInput,
@@ -14,8 +15,11 @@ export class WalletCompanion implements WalletCompanionInterface {
 
 	/** Cached protocols supported by registered wallets. */
 	#supportedProtocols = new Set<string>();
+	#rpc: RPC;
 
-	constructor() {
+	constructor(rpc: RPC) {
+		this.#rpc = rpc;
+
 		this.#updateSupportedProtocols();
 	}
 
@@ -32,34 +36,15 @@ export class WalletCompanion implements WalletCompanionInterface {
 	}
 
 	/** Fetches supported protocols from the extension. */
-	#updateSupportedProtocols(): Promise<void> {
-		return new Promise<void>((resolve) => {
-			const updateId = `protocols-update-${Date.now()}`;
-
-			const responseHandler = (event: Event) => {
-				const { detail } = event as CustomEvent;
-				if (detail.updateId === updateId) {
-					window.removeEventListener('DC_PROTOCOLS_UPDATE_RESPONSE', responseHandler);
-					if (detail.protocols) {
-						this.#supportedProtocols = new Set(detail.protocols);
-					}
-					resolve();
-				}
-			};
-
-			window.addEventListener('DC_PROTOCOLS_UPDATE_RESPONSE', responseHandler);
-
-			window.dispatchEvent(
-				new CustomEvent('DC_PROTOCOLS_UPDATE_REQUEST', {
-					detail: { updateId },
-				}),
+	async #updateSupportedProtocols(): Promise<void> {
+		try {
+			const { protocols } = await this.#rpc.send<{ protocols: string[] }>(
+				'GET_SUPPORTED_PROTOCOLS',
 			);
-
-			setTimeout(() => {
-				window.removeEventListener('DC_PROTOCOLS_UPDATE_RESPONSE', responseHandler);
-				resolve();
-			}, 1000);
-		});
+			this.#supportedProtocols = new Set(protocols);
+		} catch (error) {
+			console.warn('Failed to fetch supported protocols:', error);
+		}
 	}
 
 	async registerWallet(walletInfo: WalletRegistrationInput): Promise<WalletRegistrationResult> {
@@ -94,76 +79,22 @@ export class WalletCompanion implements WalletCompanionInterface {
 
 		const walletRegistration = parse(WalletRegistrationInputSchema, walletInfo);
 
-		return new Promise((resolve, reject) => {
-			const registrationId = `wallet-reg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
-			const responseHandler = (event: Event) => {
-				const { detail } = event as CustomEvent;
-				if (detail.registrationId === registrationId) {
-					window.removeEventListener('DC_WALLET_REGISTRATION_RESPONSE', responseHandler);
-
-					if (detail.success) {
-						// Update protocol cache after successful registration
-						this.#updateSupportedProtocols();
-						resolve({
-							success: true,
-							alreadyRegistered: detail.alreadyRegistered,
-							wallet: detail.wallet,
-						});
-					} else {
-						reject(new Error(detail.error || 'Registration failed'));
-					}
-				}
-			};
-
-			window.addEventListener('DC_WALLET_REGISTRATION_RESPONSE', responseHandler);
-
-			window.dispatchEvent(
-				new CustomEvent('DC_WALLET_REGISTRATION_REQUEST', {
-					detail: {
-						registrationId,
-						wallet: walletRegistration,
-						registeredFrom: window.location.origin,
-					},
-				}),
-			);
-
-			// Timeout after 5 seconds
-			setTimeout(() => {
-				window.removeEventListener('DC_WALLET_REGISTRATION_RESPONSE', responseHandler);
-				reject(new Error('Registration timeout'));
-			}, 5000);
+		const result = await this.#rpc.send<WalletRegistrationResult>('REGISTER_WALLET', {
+			wallet: walletRegistration,
+			registeredFrom: window.location.origin,
 		});
+
+		if (result.success) {
+			await this.#updateSupportedProtocols();
+		}
+
+		return result;
 	}
 
 	async isWalletRegistered(url: string): Promise<boolean> {
-		return new Promise((resolve, reject) => {
-			const checkId = `wallet-check-${Date.now()}`;
-
-			const responseHandler = (event: Event) => {
-				const { detail } = event as CustomEvent<{ checkId: string; isRegistered: boolean }>;
-				if (detail.checkId === checkId) {
-					window.removeEventListener('DC_WALLET_CHECK_RESPONSE', responseHandler);
-					resolve(detail.isRegistered);
-				}
-			};
-
-			window.addEventListener('DC_WALLET_CHECK_RESPONSE', responseHandler);
-
-			window.dispatchEvent(
-				new CustomEvent('DC_WALLET_CHECK_REQUEST', {
-					detail: {
-						checkId,
-						url,
-					},
-				}),
-			);
-
-			// Timeout after 5 seconds
-			setTimeout(() => {
-				window.removeEventListener('DC_WALLET_CHECK_RESPONSE', responseHandler);
-				reject(new Error('Check timeout'));
-			}, 5000);
+		const { isRegistered } = await this.#rpc.send<{ isRegistered: boolean }>('CHECK_WALLET', {
+			url,
 		});
+		return isRegistered;
 	}
 }

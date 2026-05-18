@@ -17,10 +17,10 @@ declare global {
 export type WalletOption = {
 	id: string;
 	name: string;
-	description?: string;
-	url?: string;
-	icon?: string;
-	protocols?: string[];
+	description?: string | null;
+	url?: string | null;
+	icon?: string | null;
+	protocols?: string[] | null;
 };
 
 export type ShowWalletSelectorOptions = {
