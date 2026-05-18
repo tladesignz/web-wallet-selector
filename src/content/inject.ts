@@ -40,6 +40,7 @@ type DigitalIdentityRequest = {
 navigator.credentials.get = async (options?: CredentialRequestOptions & DigitalIdentityRequest) => {
 	console.debug('navigator.credentials.get intercepted:', options);
 
+	const requestId = crypto.randomUUID();
 	const digitalRequests = options?.digital?.requests || [];
 	const isDigital = options && (options.identity || options.digital);
 
@@ -107,7 +108,7 @@ navigator.credentials.get = async (options?: CredentialRequestOptions & DigitalI
 	});
 
 	// Invoke wallet and wait for response
-	const response = await invokeWallet(selection.wallet, selection.protocol, selection.request);
+	const response = await invokeWallet(selection.wallet, selection.protocol, selection.request, requestId);
 
 	// Validate and return credential
 	const validated = protocolRegistry.validateResponse(selection.protocol, response);
@@ -176,13 +177,18 @@ function invokeWallet(
 	wallet: WalletOption,
 	protocol: string,
 	request: ProcessedRequest,
+	requestId: string,
 ): Promise<unknown> {
 	return new Promise((resolve, reject) => {
-		const walletUrl = buildWalletUrl(wallet, protocol, request);
+		const walletUrl = buildWalletUrl(wallet, protocol, request, requestId);
 
 		const handler = (e: MessageEvent) => {
 			if (e.origin !== new URL(wallet.url!).origin) return;
 			if (e.data?.type !== 'WC_WALLET_RESPONSE') return;
+			if (e.data?.requestId !== requestId) {
+				console.debug('Ignoring response with mismatched requestId:', e.data?.requestId);
+				return;
+			}
 
 			window.removeEventListener('message', handler);
 			resolve(e.data.response);
@@ -206,9 +212,17 @@ function invokeWallet(
 /**
  * Build wallet URL
  */
-function buildWalletUrl(wallet: WalletOption, protocol: string, request: ProcessedRequest): string {
+function buildWalletUrl(
+	wallet: WalletOption,
+	protocol: string,
+	request: ProcessedRequest,
+	requestId: string,
+): string {
 	if (!wallet.url) throw new Error('Wallet URL is required');
 	const url = new URL(wallet.url);
+
+	// Always include request_id for response correlation
+	url.searchParams.set('request_id', requestId);
 
 	if (protocol.startsWith('openid4vp')) {
 		const data = request.data as RequestData;

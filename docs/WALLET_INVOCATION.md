@@ -30,6 +30,7 @@ For `openid4vp` protocol variants, the extension constructs an authorization req
 **Endpoint**: `<wallet_url>/cb` (or custom path if specified in wallet config)
 
 **Parameters**:
+- `request_id`: Unique identifier for this request (UUID, for response correlation)
 - `client_id`: Origin of the requesting website
 - `response_type`: `vp_token` (requesting a verifiable presentation)
 - `response_mode`: `direct_post` (wallet should POST response)
@@ -42,6 +43,7 @@ For `openid4vp` protocol variants, the extension constructs an authorization req
 **Example URL**:
 ```
 https://demo.wwwallet.org/cb?
+  request_id=550e8400-e29b-41d4-a716-446655440000&
   client_id=https://demo.digitalcredentials.dev&
   response_type=vp_token&
   response_mode=direct_post&
@@ -63,6 +65,7 @@ The wallet can send the response via `window.postMessage()`:
 ```javascript
 window.opener.postMessage({
   type: 'WC_WALLET_RESPONSE',
+  requestId: '<request-id>',  // Must match request_id from URL
   response: {
     vp_token: '<verifiable-presentation>',
     presentation_submission: {
@@ -77,6 +80,7 @@ window.opener.postMessage({
 **Requirements**:
 - Message origin must match wallet's registered domain
 - `type` must be `'WC_WALLET_RESPONSE'`
+- `requestId` must match the `request_id` from the authorization URL
 - `response` must include required OpenID4VP response fields
 
 #### 2. HTTP Redirect/POST (Future)
