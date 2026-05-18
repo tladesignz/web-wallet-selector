@@ -4,7 +4,7 @@
 
 import type { GetSettingsResponse } from '@shared/schemas/messages';
 import { InboundMessages } from '@shared/schemas/messages';
-import type { Wallet } from '@shared/schemas/resources';
+import type { Wallet, WalletRegistrationInput } from '@shared/schemas/resources';
 import {
 	fetchFavicon,
 	generateGeometricIcon,
@@ -38,18 +38,15 @@ type NotificationType = 'success' | 'error' | 'warning' | 'info';
 // Cross-browser compatibility (storage still needed for direct stats clear)
 const storage = typeof browser !== 'undefined' ? browser.storage : chrome.storage;
 
-// wwWallet preset providers
-const WWWALLET_PRESETS: readonly Wallet[] = [
+// SIROS ID preset providers
+const SIROS_ID_PRESETS: readonly WalletRegistrationInput[] = [
 	{
-		id: 'preset-wwwallet-demo',
-		name: 'wwWallet Demo',
-		url: 'https://demo.wwwallet.org',
-		icon: '<svg width="24" height="24" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="1024" height="1024" rx="512" fill="white"/><path fill-rule="evenodd" clip-rule="evenodd" d="M374.192 204.43C398.46 362.058 398.46 362.058 556.087 386.441C398.514 410.701 398.46 411.056 374.217 568.404C374.208 568.458 374.2 568.513 374.192 568.568C349.808 410.825 349.808 410.825 192.181 386.441C349.808 362.058 349.808 362.058 374.192 204.43ZM386.441 658.938C662.636 616.18 662.636 616.18 705.394 339.87C746.997 609.13 748.037 616.064 1003.55 655.702C1016.84 610.055 1024 561.865 1024 512.058C1024 229.161 794.839 0 511.942 0C229.161 0 0 229.161 0 512.058C0 794.839 229.161 1024 511.942 1024C742.49 1024 937.328 871.804 1001.58 662.405C747.921 701.696 746.881 709.785 705.394 977.775C662.636 701.58 662.636 701.58 386.441 658.938Z" fill="#1C4587"/></svg>',
+		name: 'SIROS ID',
+		url: 'https://id.siros.org/id/default',
+        icon: '<svg width="24" height="24" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="1024" height="1024" rx="512" fill="white"/><path fill-rule="evenodd" clip-rule="evenodd" d="M374.192 204.43C398.46 362.058 398.46 362.058 556.087 386.441C398.514 410.701 398.46 411.056 374.217 568.404C374.208 568.458 374.2 568.513 374.192 568.568C349.808 410.825 349.808 410.825 192.181 386.441C349.808 362.058 349.808 362.058 374.192 204.43ZM386.441 658.938C662.636 616.18 662.636 616.18 705.394 339.87C746.997 609.13 748.037 616.064 1003.55 655.702C1016.84 610.055 1024 561.865 1024 512.058C1024 229.161 794.839 0 511.942 0C229.161 0 0 229.161 0 512.058C0 794.839 229.161 1024 511.942 1024C742.49 1024 937.328 871.804 1001.58 662.405C747.921 701.696 746.881 709.785 705.394 977.775C662.636 701.58 662.636 701.58 386.441 658.938Z" fill="#1C4587"/></svg>',
 		color: '#1C4587',
-		description: 'Official wwWallet demonstration instance',
+		description: 'Default SIROS ID tenant',
 		protocols: ['openid4vp', 'openid4vp-v1-unsigned', 'openid4vp-v1-signed'],
-		enabled: true,
-		preset: true,
 	},
 ];
 
@@ -638,7 +635,6 @@ function renderWalletCard(wallet: Wallet): string {
       <div class="meta">
         ${wallet.enabled ? '<span class="badge-label -success">Active</span>' : '<span class="badge-label -warning">Inactive</span>'}
         ${isDefault ? '<span class="badge-label -info">Default</span>' : ''}
-        ${wallet.preset ? '<span class="badge-label -info">wwWallet</span>' : ''}
         ${uses > 0 ? `<span class="badge-label -info">Used ${uses}x</span>` : ''}
       </div>
 
@@ -667,18 +663,16 @@ function renderPresets(): void {
 		return;
 	}
 
-	container.innerHTML = WWWALLET_PRESETS.map((preset) => {
+	container.innerHTML = SIROS_ID_PRESETS.map((preset) => {
 		const isAdded = wallets.some((w) => w.url === preset.url);
 		return `
       <div class="preset-card ${isAdded ? '-added' : ''}" data-preset='${JSON.stringify(preset)}'>
         <div class="icon">${preset.icon}</div>
         <div class="info">
           <div class="name">${escapeHtml(preset.name)}</div>
-          ${
-						isAdded
-							? '<div class="status -added"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Added</div>'
-							: '<div class="status">Click to add</div>'
-					}
+          ${isAdded
+			? '<div class="status -added"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Added</div>'
+			: '<div class="status">Click to add</div>'}
         </div>
         ${!isAdded ? '<button class="btn">Add</button>' : ''}
       </div>
@@ -749,7 +743,6 @@ async function addPresetWallet(preset: Wallet): Promise<void> {
 		description: preset.description,
 		protocols: preset.protocols || [],
 		enabled: true,
-		preset: true,
 	};
 
 	wallets.push(wallet);
@@ -803,7 +796,6 @@ async function handleAddWallet(e: Event): Promise<void> {
 		iconType: iconTypeInput instanceof HTMLInputElement ? iconTypeInput.value || 'emoji' : 'emoji',
 		color: '#1C4587',
 		enabled: enabledInput.checked,
-		preset: false,
 	};
 
 	// Add protocols if developer mode is enabled
