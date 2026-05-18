@@ -14,12 +14,12 @@ const __dirname = dirname(__filename);
 describe('Browser Extension - Integration Tests', () => {
 	let browser: Browser;
 	let extensionId: string | undefined;
-	const EXTENSION_PATH = join(__dirname, '..', 'chrome');
+	const EXTENSION_PATH = join(__dirname, '..', 'dist', 'chrome');
 
 	beforeAll(async () => {
 		// Check if extension is built
 		if (!existsSync(EXTENSION_PATH)) {
-			throw new Error('Extension not built. Run "npm run build:chrome" first.');
+			throw new Error('Extension not built. Run "pnpm build:chrome" first.');
 		}
 
 		// Launch browser with extension

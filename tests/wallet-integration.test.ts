@@ -16,13 +16,13 @@ const __dirname = dirname(__filename);
 describe('Mock Wallet Integration Tests', () => {
 	let browser: Browser;
 	let extensionId: string | undefined;
-	const EXTENSION_PATH = join(__dirname, '..', 'chrome');
+	const EXTENSION_PATH = join(__dirname, '..', 'dist', 'chrome');
 	const MOCK_WALLET_PATH = join(__dirname, 'fixtures', 'mock-wallet.html');
 
 	beforeAll(async () => {
 		// Check if extension is built
 		if (!existsSync(EXTENSION_PATH)) {
-			throw new Error('Extension not built. Run "npm run build:chrome" first.');
+			throw new Error('Extension not built. Run "pnpm build:chrome" first.');
 		}
 
 		// Check if mock wallet fixture exists
@@ -84,8 +84,8 @@ describe('Mock Wallet Integration Tests', () => {
 			await page.waitForFunction(
 				() =>
 					typeof (window as { mockWallet?: { state: { extensionInstalled?: boolean } } }).mockWallet !== 'undefined' &&
-					(window as { mockWallet?: { state: { extensionInstalled?: boolean } } }).mockWallet?.state.extensionInstalled !==
-						undefined,
+					(window as { mockWallet?: { state: { extensionInstalled?: boolean } } }).mockWallet?.state.extensionInstalled ===
+						true,
 				{ timeout: 5000 },
 			);
 
