@@ -15,6 +15,9 @@ export const WalletRegistrationInputSchema = object({
 	name: string(),
 	url: pipe(string(), url()),
 	icon: nullish(string()),
+	logo: nullish(string()),
+	description: nullish(string()),
+	color: nullish(string()),
 	protocols: nullish(array(string())),
 });
 export type WalletRegistrationInput = InferOutput<typeof WalletRegistrationInputSchema>;
@@ -24,6 +27,8 @@ export const WalletSchema = object({
 	name: string(),
 	url: pipe(string(), url()),
 	icon: nullish(string()),
+	description: nullish(string()),
+	color: nullish(string()),
 	protocols: nullish(array(string())),
 	enabled: boolean(),
 	autoRegistered: nullish(boolean()),

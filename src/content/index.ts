@@ -147,7 +147,9 @@ window.addEventListener('DC_WALLET_REGISTRATION_REQUEST', async (event) => {
 			wallet: {
 				name: wallet.name,
 				url: wallet.url,
-				icon: wallet.icon,
+				icon: wallet.icon ?? wallet.logo,
+				description: wallet.description,
+				color: wallet.color,
 				protocols: wallet.protocols,
 			},
 			origin: window.location.origin,

@@ -1,6 +1,18 @@
+import { Wallet } from "@shared/schemas/resources";
+import { WalletRegistrationInput } from "@shared/schemas/resources";
+
 declare global {
 	interface Window {
 		showWalletSelector: ShowWalletSelectorFunction;
+		DigitalCredentialsWalletSelector: {
+			version: string;
+			isInstalled(): boolean;
+			registerWallet(walletInfo: Wallet): Promise<{ success: boolean; alreadyRegistered: boolean; wallet: WalletOption }>;
+			isWalletRegistered(url: string): Promise<boolean>;
+			registerJWTVerifier(walletUrl: string, verifyCallback: (jwt: string, options: { publicKey?: string, certificate?: string, algorithm?: string }) => Promise<{ valid: boolean, payload?: any, error?: string }>): void;
+			unregisterJWTVerifier(walletUrl: string): void;
+			getRegisteredJWTVerifiers(): { walletUrl: string; }[];
+		}
 	}
 }
 
@@ -46,7 +58,7 @@ export type DCWalletSelectedDetail = {
 
 export type DCWalletRegistrationDetail = {
 	registrationId: string;
-	wallet: WalletOption;
+	wallet: WalletRegistrationInput;
 };
 
 export type DCWalletCheckDetail = {

@@ -3,7 +3,9 @@
  * Intercepts navigator.credentials.get() calls for the Digital Credentials API
  */
 
+import { Wallet, WalletRegistrationInput, WalletRegistrationInputSchema } from '@shared/schemas/resources';
 import { OpenID4VPPlugin, ProtocolPluginRegistry } from './protocols/';
+import { parse } from 'valibot';
 
 console.log('Digital Credentials API interceptor injected');
 
@@ -59,14 +61,15 @@ if (typeof DigitalCredential !== 'undefined') {
  * Update supported protocols cache from extension
  */
 async function updateSupportedProtocols() {
-	return new Promise((resolve) => {
+	return new Promise<void>((resolve) => {
 		const updateId = `protocols-update-${Date.now()}`;
 
-		const responseHandler = (event) => {
-			if (event.detail.updateId === updateId) {
+		const responseHandler = (event: Event) => {
+			const { detail } = event as CustomEvent;
+			if (detail.updateId === updateId) {
 				window.removeEventListener('DC_PROTOCOLS_UPDATE_RESPONSE', responseHandler);
-				if (event.detail.protocols) {
-					supportedProtocols = new Set(event.detail.protocols);
+				if (detail.protocols) {
+					supportedProtocols = new Set(detail.protocols);
 					console.log('Updated supported protocols:', Array.from(supportedProtocols));
 				}
 				resolve();
@@ -91,11 +94,22 @@ async function updateSupportedProtocols() {
 // Update protocols on load
 updateSupportedProtocols();
 
+type DigitalIdentityRequest = {
+	identity?: boolean;
+	digital?: {
+		requests: Array<{
+			protocol: string;
+			data: any;
+		}>;
+	};
+	mediation?: 'optional' | 'required' | 'silent';
+}
+
 /**
  * Override navigator.credentials.get
  */
-navigator.credentials.get = async (options) => {
-	console.log('navigator.credentials.get intercepted:', options);
+navigator.credentials.get = async (options?: CredentialRequestOptions & DigitalIdentityRequest) => {
+	console.debug('navigator.credentials.get intercepted:', options);
 
 	// Check if this is a digital identity request
 	const isDigitalIdentityRequest =
@@ -144,7 +158,7 @@ navigator.credentials.get = async (options) => {
 	const requestId = `dc-req-${++requestIdCounter}-${Date.now()}`;
 
 	// Process requests through protocol plugins
-	const processedRequests = [];
+	const processedRequests: Array<{ protocol: string; data: any; originalData: any }> = [];
 	for (const request of supportedRequests) {
 		try {
 			const preparedData = protocolRegistry.prepareRequest(request.protocol, request.data);
@@ -165,7 +179,7 @@ navigator.credentials.get = async (options) => {
 	}
 
 	// Create a promise that will be resolved when we get the response
-	const credentialPromise = new Promise((resolve, reject) => {
+	const credentialPromise = new Promise<Credential | null>((resolve, reject) => {
 		pendingRequests.set(requestId, { resolve, reject, options, processedRequests });
 
 		// Set a timeout for the request (30 seconds)
@@ -195,7 +209,7 @@ navigator.credentials.get = async (options) => {
  * Listen for responses from the content script
  */
 window.addEventListener('DC_CREDENTIALS_RESPONSE', (event) => {
-	const { requestId, response, error, useNative, protocol } = event.detail;
+	const { requestId, response, error, useNative, protocol } = (<CustomEvent>event).detail;
 
 	const pending = pendingRequests.get(requestId);
 	if (!pending) {
@@ -245,7 +259,7 @@ window.addEventListener('DC_CREDENTIALS_RESPONSE', (event) => {
 		} catch (validationError) {
 			console.error('Response validation failed:', validationError);
 			pending.reject(
-				new DOMException(`Invalid credential response: ${validationError.message}`, 'AbortError'),
+				new DOMException(`Invalid credential response: ${validationError instanceof Error ? validationError.message : String(validationError)}`, 'AbortError'),
 			);
 		}
 	} else {
@@ -258,7 +272,7 @@ window.addEventListener('DC_CREDENTIALS_RESPONSE', (event) => {
  * Listen for wallet invocation requests
  */
 window.addEventListener('DC_INVOKE_WALLET', (event) => {
-	const { requestId, wallet, protocol, request } = event.detail;
+	const { requestId, wallet, protocol, request } = (<CustomEvent>event).detail;
 
 	console.log('Invoking wallet:', wallet.name, 'for protocol:', protocol);
 
@@ -272,7 +286,7 @@ window.addEventListener('DC_INVOKE_WALLET', (event) => {
 		const _responseChannel = `dc-response-${requestId}`;
 
 		// Listen for response via postMessage or redirect
-		const messageHandler = (messageEvent) => {
+		const messageHandler = (messageEvent: MessageEvent<{ type: string; requestId: string; response?: any }>) => {
 			// Verify origin matches wallet domain
 			const walletOrigin = new URL(wallet.url).origin;
 			if (messageEvent.origin !== walletOrigin) {
@@ -336,7 +350,7 @@ window.addEventListener('DC_INVOKE_WALLET', (event) => {
 			new CustomEvent('DC_CREDENTIALS_RESPONSE', {
 				detail: {
 					requestId: requestId,
-					error: error.message,
+					error: error instanceof Error ? error.message : String(error),
 				},
 			}),
 		);
@@ -346,7 +360,7 @@ window.addEventListener('DC_INVOKE_WALLET', (event) => {
 /**
  * Build wallet URL with authorization request parameters
  */
-function buildWalletUrl(wallet, protocol, request) {
+function buildWalletUrl(wallet: Wallet, protocol: string, request: any) {
 	const walletBaseUrl = wallet.url;
 
 	// Extract the actual request data (request might have .data property from prepareRequest)
@@ -410,21 +424,12 @@ window.DigitalCredentialsWalletSelector = {
 	 * Check if the extension is installed
 	 * @returns {boolean} True if extension is installed
 	 */
-	isInstalled: () => true,
+	isInstalled: (): boolean => true,
 
 	/**
 	 * Register a wallet with the extension
-	 * @param {Object} walletInfo - Wallet information
-	 * @param {string} walletInfo.name - Display name of the wallet
-	 * @param {string} walletInfo.url - Wallet endpoint URL
-	 * @param {string[]} walletInfo.protocols - Supported protocol identifiers
-	 * @param {string} [walletInfo.description] - Optional description
-	 * @param {string} [walletInfo.icon] - Optional icon (emoji or URL)
-	 * @param {string} [walletInfo.logo] - Optional logo URL
-	 * @param {string} [walletInfo.color] - Optional brand color
-	 * @returns {Promise<Object>} Result of registration
 	 */
-	registerWallet: async (walletInfo) => {
+	registerWallet: async (walletInfo: WalletRegistrationInput) => {
 		if (!walletInfo?.name || !walletInfo.url) {
 			throw new Error('Wallet registration requires at least name and url');
 		}
@@ -456,36 +461,26 @@ window.DigitalCredentialsWalletSelector = {
 			}
 		}
 
-		// Prepare wallet data
-		const wallet = {
-			name: walletInfo.name,
-			url: walletInfo.url,
-			protocols: walletInfo.protocols,
-			description: walletInfo.description || '',
-			icon: walletInfo.icon || walletInfo.logo || '🔐',
-			color: walletInfo.color || '#1C4587',
-			enabled: true,
-			autoRegistered: true,
-			registeredAt: new Date().toISOString(),
-		};
+		const walletRegistration = parse(WalletRegistrationInputSchema, walletInfo);
 
 		// Send registration request to extension
 		return new Promise((resolve, reject) => {
 			const registrationId = `wallet-reg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
 			// Listen for response
-			const responseHandler = (event) => {
-				if (event.detail.registrationId === registrationId) {
+			const responseHandler = (event: Event) => {
+				const { detail } = event as CustomEvent;
+				if (detail.registrationId === registrationId) {
 					window.removeEventListener('DC_WALLET_REGISTRATION_RESPONSE', responseHandler);
 
-					if (event.detail.success) {
+					if (detail.success) {
 						resolve({
 							success: true,
-							alreadyRegistered: event.detail.alreadyRegistered,
-							wallet: event.detail.wallet,
+							alreadyRegistered: detail.alreadyRegistered,
+							wallet: detail.wallet,
 						});
 					} else {
-						reject(new Error(event.detail.error || 'Registration failed'));
+						reject(new Error(detail.error || 'Registration failed'));
 					}
 				}
 			};
@@ -497,7 +492,8 @@ window.DigitalCredentialsWalletSelector = {
 				new CustomEvent('DC_WALLET_REGISTRATION_REQUEST', {
 					detail: {
 						registrationId: registrationId,
-						wallet: wallet,
+						wallet: walletRegistration,          // WalletRegistrationInput
+						registeredFrom: window.location.origin, // only available here in page context
 					},
 				}),
 			);
@@ -519,10 +515,11 @@ window.DigitalCredentialsWalletSelector = {
 		new Promise((resolve, reject) => {
 			const checkId = `wallet-check-${Date.now()}`;
 
-			const responseHandler = (event) => {
-				if (event.detail.checkId === checkId) {
+			const responseHandler = (event: Event) => {
+				const { detail } = event as CustomEvent<{ checkId: string; isRegistered: boolean }>;
+				if (detail.checkId === checkId) {
 					window.removeEventListener('DC_WALLET_CHECK_RESPONSE', responseHandler);
-					resolve(event.detail.isRegistered);
+					resolve(detail.isRegistered);
 				}
 			};
 
@@ -591,6 +588,7 @@ window.DigitalCredentialsWalletSelector = {
 };
 
 // Also expose under a shorter alias
+// @ts-ignore
 window.DCWS = window.DigitalCredentialsWalletSelector;
 
 console.log('Wallet auto-registration API exposed');
