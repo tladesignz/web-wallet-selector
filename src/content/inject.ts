@@ -85,7 +85,7 @@ navigator.credentials.get = async (options?: CredentialRequestOptions & DigitalI
 	// Get wallets from content script
 	const { useNative, wallets } = await rpc.send<{ useNative?: boolean; wallets?: WalletOption[] }>(
 		'SHOW_WALLET_SELECTOR',
-		{ requests: processedRequests, options },
+		{ requests: processedRequests },
 	);
 
 	if (useNative) {
