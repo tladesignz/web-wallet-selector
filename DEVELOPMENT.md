@@ -144,7 +144,7 @@ start test-wallet-api.html  # Windows
 ```
 
 **Features tested:**
-- Extension detection (`DCWS.isInstalled()`)
+- Extension detection (`WalletCompanion.DigitalCredentials.isInstalled`)
 - Wallet registration with protocols
 - JWT verifier registration
 - API error handling

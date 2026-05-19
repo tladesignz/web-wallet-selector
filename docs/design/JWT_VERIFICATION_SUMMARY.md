@@ -18,7 +18,7 @@ OpenID4VP uses **JAR (JWT Secured Authorization Request)** where verifiers send 
 
 ```javascript
 // Wallet registers its verifier
-DCWS.registerJWTVerifier('https://wallet.example.com', async (jwt, options) => {
+WalletCompanion.DigitalCredentials.registerJWTVerifier('https://wallet.example.com', async (jwt, options) => {
   // Wallet's crypto library does the verification
   const result = await myWalletCrypto.verify(jwt, options.certificate);
   return { valid: result.valid, payload: result.payload };
@@ -33,7 +33,7 @@ const authParams = await plugin.handleRequestUri(requestUri, {
 
 ## API Added
 
-### `DCWS.registerJWTVerifier(walletUrl, verifyCallback)`
+### `WalletCompanion.DigitalCredentials.registerJWTVerifier(walletUrl, verifyCallback)`
 Register a JWT verification function for a wallet.
 
 **Callback Signature:**
@@ -44,10 +44,10 @@ async (jwt, options) => {
 }
 ```
 
-### `DCWS.unregisterJWTVerifier(walletUrl)`
+### `WalletCompanion.DigitalCredentials.unregisterJWTVerifier(walletUrl)`
 Remove a registered verifier.
 
-### `DCWS.getRegisteredJWTVerifiers()`
+### `WalletCompanion.DigitalCredentials.registeredJWTVerifiers()`
 List all wallets with registered verifiers.
 
 ## Integration Points

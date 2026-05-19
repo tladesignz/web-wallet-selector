@@ -8,27 +8,27 @@ Comprehensive integration testing strategy for wallet auto-registration and JWT 
 
 ```
 ┌─────────────────────────────────────────┐
-│  Integration Test (Puppeteer/Jest)     │
-│  - Launches browser with extension     │
-│  - Creates mock wallet page            │
-│  - Executes test scenarios             │
+│  Integration Test (Puppeteer/Jest)      │
+│  - Launches browser with extension      │
+│  - Creates mock wallet page             │
+│  - Executes test scenarios              │
 └────────────┬────────────────────────────┘
              │
              v
-┌─────────────────────────────────────────┐
-│  Mock Wallet HTML Page                  │
-│  - Simulates wallet behavior           │
-│  - Calls DCWS registration API         │
-│  - Provides JWT verification callback  │
-│  - Exposes test interface              │
-└────────────┬────────────────────────────┘
+┌───────────────────────────────────────────┐
+│  Mock Wallet HTML Page                    │
+│  - Simulates wallet behavior              │
+│  - Calls WalletCompanion registration API │
+│  - Provides JWT verification callback     │
+│  - Exposes test interface                 │
+└────────────┬──────────────────────────────┘
              │
              v
 ┌─────────────────────────────────────────┐
 │  Extension (inject.js)                  │
-│  - Receives registration request       │
-│  - Stores wallet info                  │
-│  - Registers JWT verifier              │
+│  - Receives registration request        │
+│  - Stores wallet info                   │
+│  - Registers JWT verifier               │
 └─────────────────────────────────────────┘
 ```
 
@@ -114,7 +114,7 @@ Jest/Puppeteer tests that:
 - Load mock wallet in Puppeteer
 - Verify registration succeeds
 - Check wallet appears in extension storage
-- Verify DCWS API methods work
+- Verify WalletCompanion API methods work
 
 ### Phase 2: JWT Verification Testing
 
@@ -248,7 +248,7 @@ test('should register wallet and JWT verifier', async () => {
 
 ## Success Metrics
 
-- ✅ 100% coverage of DCWS API methods
+- ✅ 100% coverage of WalletCompanion API methods
 - ✅ All registration scenarios tested
 - ✅ All JWT callback scenarios tested
 - ✅ End-to-end OpenID4VP flow tested
