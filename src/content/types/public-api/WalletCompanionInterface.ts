@@ -34,7 +34,8 @@ export interface WalletCompanionInterface {
 
 	/**
 	 * Protocol identifiers supported by at least one registered wallet.
-	 * Common values: `'openid4vp'`, `'mdoc-openid4vp'`
+	 * Values are determined by {@link OpenID4VPPlugin.getProtocolId}:
+	 * `'openid4vp'` for the base plugin, or `'openid4vp-<variant>'` for variant instances.
 	 */
 	readonly supportedProtocols: readonly string[];
 
