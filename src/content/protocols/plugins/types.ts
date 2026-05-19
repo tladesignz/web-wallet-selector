@@ -45,7 +45,8 @@ export type RequestData = {
 	presentation_definition?: PresentationDefinition;
 	presentation_definition_uri?: string;
 	client_metadata?: ClientMetadata;
-	response_mode?: 'direct_post' | 'direct_post.jwt';
+	response_type?: 'vp_token' | 'vp_token id_token' | 'code'
+	response_mode?: 'direct_post' | 'dc_api' | `${'direct_post' | 'dc_api'}.jwt`;
 	dcql_query?: DCQLQuery;
 };
 

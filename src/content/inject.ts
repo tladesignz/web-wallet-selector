@@ -245,7 +245,7 @@ function buildWalletUrl(
 	if (protocol.startsWith('openid4vp')) {
 		const data = request.data as RequestData;
 		url.searchParams.set('client_id', window.location.origin);
-		url.searchParams.set('response_type', data.response_mode || 'vp_token');
+		url.searchParams.set('response_type', data.response_type || 'vp_token');
 		url.searchParams.set('response_mode', data.response_mode || 'dc_api');
 		if (data.nonce) url.searchParams.set('nonce', data.nonce);
 		url.searchParams.set('response_uri', window.location.href);
