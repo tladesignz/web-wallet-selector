@@ -32,6 +32,8 @@ export class RPC {
 	 */
 	constructor(handler?: Handler) {
 		window.addEventListener('message', async (e) => {
+			if (e.source !== window) return;
+			if (e.origin !== window.location.origin) return;
 			if (e.data?.channel !== this.#channel) return;
 
 			// Response to our request
