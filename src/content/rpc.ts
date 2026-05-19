@@ -22,7 +22,7 @@ export type Handler = (type: string, payload: unknown) => Promise<unknown>;
  */
 export class RPC {
 	#channel = 'WALLET_COMPANION_RPC';
-	#pending = new Map<number, (v: any) => void>();
+	#pending = new Map<number, { resolve: (v: any) => void; reject: (v: any) => void }>();
 	#id = 0;
 
 	/**
@@ -37,8 +37,11 @@ export class RPC {
 			if (e.data?.channel !== this.#channel) return;
 
 			// Response to our request
-			if (this.#pending.has(e.data.id) && 'response' in e.data) {
-				this.#pending.get(e.data.id)?.(e.data.response);
+			const pending = this.#pending.get(e.data.id);
+			if (pending) {
+				if ('response' in e.data) pending.resolve(e.data.response);
+				else if ('error' in e.data) pending.reject(e.data.error);
+
 				this.#pending.delete(e.data.id);
 				return;
 			}
@@ -46,8 +49,14 @@ export class RPC {
 			// Incoming request
 			if (handler && e.data.type) {
 				const { id, type, payload } = e.data;
-				const response = await handler(type, payload);
-				window.postMessage({ channel: this.#channel, id, response }, window.location.origin);
+
+				try {
+					const response = await handler(type, payload);
+					window.postMessage({ channel: this.#channel, id, response }, window.location.origin);
+				} catch (err) {
+					const error = err instanceof Error ? err : new Error(String(err));
+					window.postMessage({ channel: this.#channel, id, error }, window.location.origin);
+				}
 			}
 		});
 	}
@@ -59,9 +68,24 @@ export class RPC {
 	 * @returns Promise resolving to the response
 	 */
 	send<T>(type: string, payload?: object): Promise<T> {
-		return new Promise((resolve) => {
+		return new Promise((resolve, reject) => {
 			const msgId = ++this.#id;
-			this.#pending.set(msgId, resolve);
+			const timer = setTimeout(() => {
+				this.#pending.delete(msgId);
+				reject(new DOMException(`RPC timeout: ${type}`, 'AbortError'));
+			}, 5 * 1000);
+
+			this.#pending.set(msgId, {
+				resolve(v) {
+					clearTimeout(timer);
+					resolve(v);
+				},
+				reject(v) {
+					clearTimeout(timer);
+					reject(v);
+				},
+			});
+
 			window.postMessage(
 				{ channel: this.#channel, id: msgId, type, payload },
 				window.location.origin,
