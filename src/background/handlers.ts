@@ -391,7 +391,11 @@ async function getSupportedProtocols() {
 async function _getWalletsForProtocol(protocol: string) {
 	const wallets = await getConfiguredWallets();
 	return wallets.filter(
-		(w) => w.enabled && w.protocols && Array.isArray(w.protocols) && w.protocols.includes(protocol),
+		(w) =>
+			w.enabled &&
+			w.protocols &&
+			Array.isArray(w.protocols) &&
+			w.protocols.includes(protocol),
 	);
 }
 
