@@ -113,7 +113,8 @@ export class OpenID4VPPlugin extends ProtocolPlugin {
 					JSON.parse(params.get('presentation_definition') ?? 'null') ?? undefined,
 				presentation_definition_uri: params.get('presentation_definition_uri') ?? undefined,
 				client_metadata: JSON.parse(params.get('client_metadata') ?? 'null') ?? undefined,
-				response_mode: (params.get('response_mode') ?? undefined) as RequestData['response_mode'],
+				response_mode: (params.get('response_mode') ??
+					undefined) as RequestData['response_mode'],
 				dcql_query: JSON.parse(params.get('dcql_query') ?? 'null') ?? undefined,
 			};
 		} catch (err) {
@@ -246,7 +247,10 @@ export class OpenID4VPPlugin extends ProtocolPlugin {
 				);
 			}
 			if (preparedRequest.presentation_definition_uri) {
-				params.set('presentation_definition_uri', preparedRequest.presentation_definition_uri);
+				params.set(
+					'presentation_definition_uri',
+					preparedRequest.presentation_definition_uri,
+				);
 			}
 			if (preparedRequest.client_metadata) {
 				params.set('client_metadata', JSON.stringify(preparedRequest.client_metadata));
@@ -328,7 +332,9 @@ export class OpenID4VPPlugin extends ProtocolPlugin {
 					);
 				}
 			} else {
-				console.warn('OpenID4VP: JWT signature verification skipped - no verifier provided');
+				console.warn(
+					'OpenID4VP: JWT signature verification skipped - no verifier provided',
+				);
 				console.warn(
 					'To enable verification, register a JWT verifier via WalletCompanion.DigitalCredentials.registerJWTVerifier()',
 				);
