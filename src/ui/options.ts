@@ -453,7 +453,10 @@ function handleEditNameChange(): void {
 	const nameInput = document.getElementById('edit-wallet-name');
 
 	if (!(urlInput instanceof HTMLInputElement) || !(nameInput instanceof HTMLInputElement)) {
-		console.error('handleEditNameChange: Missing required form inputs', { urlInput, nameInput });
+		console.error('handleEditNameChange: Missing required form inputs', {
+			urlInput,
+			nameInput,
+		});
 		return;
 	}
 
@@ -668,10 +671,10 @@ function renderPresets(): void {
         <div class="info">
           <div class="name">${escapeHtml(preset.name)}</div>
           ${
-						isAdded
-							? '<div class="status -added"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Added</div>'
-							: '<div class="status">Click to add</div>'
-					}
+				isAdded
+					? '<div class="status -added"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Added</div>'
+					: '<div class="status">Click to add</div>'
+			}
         </div>
         ${!isAdded ? '<button class="btn">Add</button>' : ''}
       </div>
@@ -792,7 +795,8 @@ async function handleAddWallet(e: Event): Promise<void> {
 		url: urlInput.value,
 		description: descInput.value,
 		icon: iconInput.value || '🔐',
-		iconType: iconTypeInput instanceof HTMLInputElement ? iconTypeInput.value || 'emoji' : 'emoji',
+		iconType:
+			iconTypeInput instanceof HTMLInputElement ? iconTypeInput.value || 'emoji' : 'emoji',
 		color: '#1C4587',
 		enabled: enabledInput.checked,
 	};
@@ -875,7 +879,11 @@ async function openEditModal(wallet: Wallet): Promise<void> {
 	await generateEditIconOptions(wallet.url, wallet.name, wallet.icon, wallet.iconType);
 
 	// Populate protocols if developer mode is enabled
-	if (settings.developerMode && wallet.protocols && protocolsInput instanceof HTMLTextAreaElement) {
+	if (
+		settings.developerMode &&
+		wallet.protocols &&
+		protocolsInput instanceof HTMLTextAreaElement
+	) {
 		protocolsInput.value = wallet.protocols.join('\n');
 	} else if (protocolsInput instanceof HTMLTextAreaElement) {
 		protocolsInput.value = '';
@@ -963,7 +971,8 @@ async function handleSaveEdit(): Promise<void> {
 				? descInput.value
 				: wallets[walletIndex].description,
 		icon: iconInput instanceof HTMLInputElement ? iconInput.value || '🔐' : '🔐',
-		iconType: iconTypeInput instanceof HTMLInputElement ? iconTypeInput.value || 'emoji' : 'emoji',
+		iconType:
+			iconTypeInput instanceof HTMLInputElement ? iconTypeInput.value || 'emoji' : 'emoji',
 		enabled: enabledInput.checked,
 	};
 
@@ -1371,7 +1380,9 @@ function selectIconInForm(prefix: string, type: string, value: string): void {
 		iconInput.value = value;
 		if (iconTypeInput instanceof HTMLInputElement) iconTypeInput.value = 'emoji';
 
-		const emojiBtn = document.querySelector(`${emojiSelector}[data-emoji="${CSS.escape(value)}"]`);
+		const emojiBtn = document.querySelector(
+			`${emojiSelector}[data-emoji="${CSS.escape(value)}"]`,
+		);
 		if (emojiBtn) emojiBtn.classList.add('-selected');
 	} else if (type === 'favicon') {
 		preview.innerHTML = `<img src="${value}" alt="Wallet icon">`;
