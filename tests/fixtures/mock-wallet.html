@@ -1,399 +1,83 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mock Wallet - Integration Test</title>
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      max-width: 800px;
-      margin: 20px auto;
-      padding: 20px;
-      background: #f9fafb;
-    }
-    .status {
-      padding: 12px;
-      border-radius: 6px;
-      margin: 10px 0;
-      font-size: 14px;
-    }
-    .success { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
-    .error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-    .info { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
-    code { background: #1f2937; color: #f3f4f6; padding: 2px 6px; border-radius: 3px; }
-    pre { background: #1f2937; color: #f3f4f6; padding: 15px; border-radius: 6px; overflow-x: auto; }
-  </style>
-</head>
-<body>
-  <h1>🧪 Mock Wallet (Test Fixture)</h1>
-  <p>This page simulates a digital wallet for integration testing.</p>
-  
-  <div id="status"></div>
-  <div id="verifier-status"></div>
-  <div id="state"></div>
+<html lang="en" data-color-mode="dark" data-dark-theme="dark">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Mock Wallet - Test Fixture</title>
+		<link rel="stylesheet" href="style.css" />
+	</head>
+	<body>
+		<div class="container-md p-4" x-data="walletApp()" x-init="init()">
+			<div class="d-flex flex-justify-between flex-items-center mb-1">
+				<h1 class="h2 mb-0">Mock Wallet</h1>
+				<a href="/" class="btn btn-sm mr-2">Home</a>
+			</div>
+			<p class="color-fg-muted mb-4">Digital Credential Wallet Test Fixture</p>
 
-  <script>
-    /**
-     * Mock Wallet - Test Fixture
-     * 
-     * This page simulates a digital identity wallet for integration testing.
-     * It provides a programmable interface for test automation.
-     */
+			<div class="Box p-3 mb-3" x-show="requestError" x-cloak>
+				<h2 class="f4 mb-2">Request Error</h2>
+				<div class="flash flash-error" x-text="requestError"></div>
+			</div>
 
-    // Default wallet configuration
-    const DEFAULT_WALLET_CONFIG = {
-      name: 'Mock Wallet',
-      url: 'https://mock-wallet.test.local',
-      protocols: ['openid4vp', 'w3c-vc'],
-      description: 'Mock wallet for integration testing',
-      icon: '🧪',
-      color: '#10b981'
-    };
+			<dialog class="Box color-shadow-extra-large rounded-2" x-ref="requestDialog" style="max-width: 480px; width: 90%;" data-testid="request-dialog">
+			<div class="Box-header d-flex flex-items-center flex-justify-between">
+				<h2 class="Box-title">Credential Request</h2>
+				<button class="btn-octicon" @click="sendResponse(false)" aria-label="Close">
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+					<path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"></path>
+				</svg>
+				</button>
+			</div>
+			<div class="Box-body">
+				<div class="flash mb-3" :class="requestStatusClass" x-text="requestStatusText"></div>
+				<div class="request-details">
+				<div class="field"><span class="label">Request ID:</span><span class="value" x-text="currentRequest?.request_id"></span></div>
+				<div class="field"><span class="label">Client ID:</span><span class="value" x-text="currentRequest?.client_id || 'N/A'"></span></div>
+				<div class="field"><span class="label">Response Type:</span><span class="value" x-text="currentRequest?.response_type || 'N/A'"></span></div>
+				<div class="field"><span class="label">Response Mode:</span><span class="value" x-text="currentRequest?.response_mode || 'N/A'"></span></div>
+				<div class="field"><span class="label">Nonce:</span><span class="value" x-text="currentRequest?.nonce || 'N/A'"></span></div>
+				<div class="field"><span class="label">Response URI:</span><span class="value" x-text="currentRequest?.response_uri || 'N/A'"></span></div>
+				<template x-if="currentRequest?.dcql_query">
+					<div>
+					<div class="field"><span class="label">DCQL Query:</span></div>
+					<pre class="p-2 rounded-2 color-bg-subtle" x-text="JSON.stringify(currentRequest.dcql_query, null, 2)"></pre>
+					</div>
+				</template>
+				</div>
+			</div>
+			<div class="Box-footer d-flex flex-justify-end">
+				<button class="btn btn-danger mr-2" @click="sendResponse(false)" :disabled="!canRespond" data-testid="deny-button">Cancel</button>
+				<button class="btn btn-primary" @click="sendResponse(true)" :disabled="!canRespond" data-testid="approve-button">Send Credential</button>
+			</div>
+			</dialog>
 
-    // Mock Wallet Test Interface
-    window.mockWallet = {
-      // State
-      state: {
-        extensionInstalled: false,
-        registered: false,
-        walletInfo: null,
-        verifierRegistered: false,
-        lastError: null,
-        callHistory: []
-      },
+			<div class="Box p-3 mb-3">
+				<h2 class="f4 mb-2">Extension Status</h2>
+				<div class="flash" :class="extensionStatusClass" x-text="extensionStatusText" data-testid="extension-status"></div>
+				<div class="flex mt-2">
+					<button class="btn btn-primary mr-1" @click="registerWallet()" :disabled="!extensionReady" data-testid="register-button">Register Wallet</button>
+					<button class="btn" @click="checkRegistration()" :disabled="!extensionReady" data-testid="check-registration-button">Check Registration</button>
+				</div>
+			</div>
 
-      // Configuration
-      config: { ...DEFAULT_WALLET_CONFIG },
+			<div class="Box p-3 mb-3">
+				<h2 class="f4 mb-2">Activity Log</h2>
+				<div>
+					<template x-for="entry in log" :key="entry.id">
+						<div class="entry">
+							<span class="time" x-text="entry.time"></span>
+							<span x-text="entry.message"></span>
+						</div>
+					</template>
+				</div>
+			</div>
 
-      /**
-       * Initialize the mock wallet
-       */
-      async initialize(customConfig) {
-        this.log('Initializing mock wallet...');
-        
-        if (customConfig) {
-          this.config = { ...DEFAULT_WALLET_CONFIG, ...customConfig };
-        }
-
-        // Wait for extension to be injected (with timeout)
-        const startTime = Date.now();
-        while (!window.DCWS && (Date.now() - startTime < 3000)) {
-          await new Promise(resolve => setTimeout(resolve, 100));
-        }
-
-        // Check if extension is installed
-        this.state.extensionInstalled = typeof window.DCWS?.isInstalled === 'function' 
-          && window.DCWS.isInstalled();
-
-        if (!this.state.extensionInstalled) {
-          this.setStatus('Extension not installed', 'error');
-          return false;
-        }
-
-        this.setStatus('Extension detected', 'success');
-        return true;
-      },
-
-      /**
-       * Register wallet with extension
-       */
-      async register(customInfo) {
-        this.log('Registering wallet...');
-        
-        const walletInfo = customInfo || this.config;
-
-        try {
-          const result = await window.DCWS.registerWallet(walletInfo);
-          
-          this.state.registered = true;
-          this.state.walletInfo = result.wallet;
-          
-          // Update config URL if custom URL was provided
-          if (walletInfo.url) {
-            this.config.url = walletInfo.url;
-          }
-          
-          this.addToHistory('register', { request: walletInfo, response: result });
-          
-          this.setStatus(
-            result.alreadyRegistered 
-              ? 'Wallet already registered' 
-              : 'Wallet registered successfully',
-            'success'
-          );
-
-          return result;
-        } catch (error) {
-          this.state.lastError = error.message;
-          this.addToHistory('register', { request: walletInfo, error: error.message });
-          this.setStatus('Registration failed: ' + error.message, 'error');
-          throw error;
-        }
-      },
-
-      /**
-       * Check if wallet is registered
-       */
-      async isRegistered(url) {
-        const checkUrl = url || this.config.url;
-        
-        try {
-          const isRegistered = await window.DCWS.isWalletRegistered(checkUrl);
-          this.addToHistory('isRegistered', { url: checkUrl, result: isRegistered });
-          return isRegistered;
-        } catch (error) {
-          this.state.lastError = error.message;
-          this.addToHistory('isRegistered', { url: checkUrl, error: error.message });
-          throw error;
-        }
-      },
-
-      /**
-       * Register JWT verification callback
-       */
-      async registerVerifier(customCallback) {
-        this.log('Registering JWT verifier...');
-
-        const callback = customCallback || this.defaultJWTVerifier.bind(this);
-
-        try {
-          const success = window.DCWS.registerJWTVerifier(this.config.url, callback);
-          
-          this.state.verifierRegistered = success;
-          this.addToHistory('registerVerifier', { success });
-          
-          this.setVerifierStatus(
-            success ? 'JWT verifier registered' : 'JWT verifier registration failed',
-            success ? 'success' : 'error'
-          );
-
-          return success;
-        } catch (error) {
-          this.state.lastError = error.message;
-          this.addToHistory('registerVerifier', { error: error.message });
-          this.setVerifierStatus('Verifier registration failed: ' + error.message, 'error');
-          throw error;
-        }
-      },
-
-      /**
-       * Unregister JWT verification callback
-       */
-      async unregisterVerifier() {
-        this.log('Unregistering JWT verifier...');
-
-        try {
-          const removed = window.DCWS.unregisterJWTVerifier(this.config.url);
-          
-          if (removed) {
-            this.state.verifierRegistered = false;
-          }
-          
-          this.addToHistory('unregisterVerifier', { removed });
-          this.setVerifierStatus(
-            removed ? 'JWT verifier removed' : 'No verifier to remove',
-            removed ? 'success' : 'info'
-          );
-
-          return removed;
-        } catch (error) {
-          this.state.lastError = error.message;
-          this.addToHistory('unregisterVerifier', { error: error.message });
-          throw error;
-        }
-      },
-
-      /**
-       * Get list of registered JWT verifiers
-       */
-      getRegisteredVerifiers() {
-        try {
-          const verifiers = window.DCWS.getRegisteredJWTVerifiers();
-          this.addToHistory('getRegisteredVerifiers', { verifiers });
-          return verifiers;
-        } catch (error) {
-          this.state.lastError = error.message;
-          this.addToHistory('getRegisteredVerifiers', { error: error.message });
-          throw error;
-        }
-      },
-
-      /**
-       * Default JWT verifier implementation (for testing)
-       */
-      async defaultJWTVerifier(jwt, options) {
-        this.log('JWT verifier called', { jwt: jwt.substring(0, 50) + '...', options });
-        this.addToHistory('jwtVerifierCalled', { jwt, options });
-
-        // Simple mock verification - always returns valid
-        // Real implementation would verify signature
-        try {
-          const [headerB64, payloadB64] = jwt.split('.');
-          const header = JSON.parse(atob(headerB64));
-          const payload = JSON.parse(atob(payloadB64));
-
-          return {
-            valid: true,
-            payload,
-            header
-          };
-        } catch (error) {
-          return {
-            valid: false,
-            error: 'Invalid JWT format'
-          };
-        }
-      },
-
-      /**
-       * Simulate OpenID4VP request handling (for future testing)
-       */
-      async simulateOpenID4VPRequest(request) {
-        this.log('Simulating OpenID4VP request...', request);
-        this.addToHistory('openid4vp_request', { request });
-
-        // TODO: Implement mock credential selection and response
-        return {
-          vp_token: 'mock_vp_token',
-          presentation_submission: {
-            id: 'mock_submission',
-            definition_id: request.presentation_definition?.id || 'mock_definition',
-            descriptor_map: []
-          }
-        };
-      },
-
-      /**
-       * Simulate error scenarios (for testing error handling)
-       */
-      async simulateError(errorType) {
-        this.log('Simulating error:', errorType);
-
-        switch (errorType) {
-          case 'registration_timeout':
-            // Registration that times out
-            return new Promise((_, reject) => {
-              setTimeout(() => reject(new Error('Registration timeout')), 6000);
-            });
-          
-          case 'invalid_url':
-            // Registration with invalid URL
-            return this.register({ ...this.config, url: 'not-a-valid-url' });
-          
-          case 'missing_protocols':
-            // Registration without protocols
-            return this.register({ ...this.config, protocols: [] });
-          
-          case 'invalid_protocol':
-            // Registration with invalid protocol identifier
-            return this.register({ ...this.config, protocols: ['Invalid Protocol!'] });
-          
-          case 'verifier_not_function':
-            // Register non-function as verifier
-            return window.DCWS.registerJWTVerifier(this.config.url, 'not-a-function');
-          
-          default:
-            throw new Error('Unknown error type: ' + errorType);
-        }
-      },
-
-      /**
-       * Get current state (for test assertions)
-       */
-      getState() {
-        return { ...this.state };
-      },
-
-      /**
-       * Get call history (for test verification)
-       */
-      getCallHistory() {
-        return [...this.state.callHistory];
-      },
-
-      /**
-       * Reset state (for test cleanup)
-       */
-      reset() {
-        this.state = {
-          extensionInstalled: this.state.extensionInstalled,
-          registered: false,
-          walletInfo: null,
-          verifierRegistered: false,
-          lastError: null,
-          callHistory: []
-        };
-        this.config = { ...DEFAULT_WALLET_CONFIG };
-        this.updateStateDisplay();
-      },
-
-      // UI Helper Methods
-      setStatus(message, type = 'info') {
-        const statusEl = document.getElementById('status');
-        if (statusEl) {
-          statusEl.className = `status ${type}`;
-          statusEl.textContent = message;
-        }
-      },
-
-      setVerifierStatus(message, type = 'info') {
-        const statusEl = document.getElementById('verifier-status');
-        if (statusEl) {
-          statusEl.className = `status ${type}`;
-          statusEl.textContent = message;
-        }
-      },
-
-      log(...args) {
-        console.log('[Mock Wallet]', ...args);
-      },
-
-      addToHistory(action, data) {
-        this.state.callHistory.push({
-          action,
-          data,
-          timestamp: new Date().toISOString()
-        });
-        this.updateStateDisplay();
-      },
-
-      updateStateDisplay() {
-        const stateEl = document.getElementById('state');
-        if (stateEl) {
-          stateEl.innerHTML = `
-            <h3>Current State</h3>
-            <pre>${JSON.stringify(this.state, null, 2)}</pre>
-          `;
-        }
-      }
-    };
-
-    // Auto-initialize on load
-    window.addEventListener('DOMContentLoaded', async () => {
-      try {
-        const initialized = await window.mockWallet.initialize();
-        
-        if (initialized) {
-          // Auto-register by default (can be disabled in tests)
-          if (window.location.search.includes('auto-register=false')) {
-            window.mockWallet.setStatus('Auto-registration disabled', 'info');
-          } else {
-            await window.mockWallet.register();
-          }
-        }
-      } catch (error) {
-        console.error('Mock wallet initialization error:', error);
-        window.mockWallet.setStatus('Initialization error: ' + error.message, 'error');
-      }
-    });
-
-    // Expose for debugging
-    window.addEventListener('load', () => {
-      console.log('Mock Wallet test interface ready');
-      console.log('Access via: window.mockWallet');
-      console.log('State:', window.mockWallet.getState());
-    });
-  </script>
-</body>
+			<div class="Box p-3 mb-3">
+				<h2 class="f4 mb-2">Wallet State</h2>
+				<pre class="p-2 rounded-2 color-bg-subtle" x-text="stateJson"></pre>
+			</div>
+		</div>
+		<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
+		<script src="mock-wallet.js"></script>
+	</body>
 </html>

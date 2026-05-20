@@ -1,0 +1,72 @@
+@import url('https://unpkg.com/@primer/css@^21/dist/primer.css');
+
+/* Hide elements until Alpine.js initializes */
+[x-cloak] { display: none !important; }
+
+body {
+  padding: var(--base-size-16);
+}
+
+.container-md {
+  padding: 0;
+}
+
+.flash-wallet {
+  --color-flash-text: var(--fgColor-default);
+}
+
+.test-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--base-size-16);
+}
+
+.request-details .field {
+  display: flex;
+  gap: var(--base-size-8);
+  padding: var(--base-size-4) 0;
+  font-size: var(--text-body-size-small);
+  border-bottom: 1px solid var(--borderColor-muted);
+}
+
+.request-details .label {
+  color: var(--fgColor-muted);
+  min-width: 100px;
+  flex-shrink: 0;
+}
+
+#log {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+#log .entry {
+  padding: var(--base-size-4) 0;
+  border-bottom: 1px solid var(--borderColor-muted);
+  font-size: var(--text-body-size-small);
+}
+
+#log .time {
+  color: var(--fgColor-muted);
+  margin-right: var(--base-size-8);
+}
+
+dialog {
+  border: none;
+  padding: 0;
+}
+
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+}
+
+dialog :is(.Box-header, .Box-body) {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+dialog pre {
+  max-width: 100%;
+  overflow-x: auto;
+}

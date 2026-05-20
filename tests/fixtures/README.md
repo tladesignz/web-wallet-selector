@@ -1,168 +1,250 @@
 # Test Fixtures
 
-This directory contains test fixtures for integration testing.
+Test fixtures for integration testing the Wallet Companion extension with the Digital Credentials API.
 
 ## Mock Wallet (`mock-wallet.html`)
 
-A programmable mock wallet for integration testing the extension's wallet auto-registration API and JWT verification callbacks.
-
-### Purpose
-
-The mock wallet simulates a digital identity wallet without requiring a real wallet implementation. It provides a JavaScript interface that can be controlled from Puppeteer tests.
+A programmable mock wallet for testing the extension's wallet registration and credential request handling.
 
 ### Features
 
-- ✅ **Auto-registration** - Automatically registers with extension on load
-- ✅ **Programmable** - Test can inject custom behavior via `page.evaluate()`
-- ✅ **Observable** - Exposes state for test assertions
-- ✅ **Error Simulation** - Can simulate various error scenarios
-- ✅ **Call History** - Tracks all API calls for verification
-- ✅ **JWT Verification** - Provides mock JWT verifier callback
+- **Wallet registration** — Registers with extension via `WalletCompanion.registerWallet()`
+- **Credential requests** — Handles incoming OpenID4VP requests with DCQL queries
+- **Mock credentials** — Generates SD-JWT and mso_mdoc format credentials
+- **Playwright-friendly** — Exposes `window.mockWallet` API for test automation
+- **Activity logging** — Tracks all operations for test assertions
 
-### API Interface
+### API Reference (`window.mockWallet`)
 
-The mock wallet exposes `window.mockWallet` with the following interface:
-
-#### State
+#### State Access
 
 ```javascript
-window.mockWallet.state = {
-  extensionInstalled: boolean,  // Whether extension is detected
-  registered: boolean,          // Whether wallet is registered
-  walletInfo: Object | null,    // Registered wallet information
-  verifierRegistered: boolean,  // Whether JWT verifier is registered
-  lastError: string | null,     // Last error message
-  callHistory: Array            // History of all API calls
-}
+// Reactive state getter
+mockWallet.state  // { extensionReady, registered, walletId, currentRequest, requestError, canRespond }
+
+// Snapshot function
+mockWallet.getState()  // Same as above, but a plain object copy
 ```
 
-#### Methods
-
-**Configuration:**
-- `initialize(customConfig)` - Initialize with custom configuration
-- `reset()` - Reset state to initial values
-
-**Registration:**
-- `register(customInfo)` - Register wallet with extension
-- `isRegistered(url)` - Check if wallet is registered
-
-**JWT Verification:**
-- `registerVerifier(customCallback)` - Register JWT verifier
-- `unregisterVerifier()` - Unregister JWT verifier
-- `getRegisteredVerifiers()` - Get list of registered verifiers
-
-**Simulation:**
-- `simulateOpenID4VPRequest(request)` - Simulate OpenID4VP flow
-- `simulateError(errorType)` - Simulate error scenarios
-
-**Introspection:**
-- `getState()` - Get current state
-- `getCallHistory()` - Get history of all calls
-
-### Error Simulation
-
-The mock wallet can simulate various error scenarios:
+#### Action Triggers
 
 ```javascript
-// Invalid URL
-await mockWallet.simulateError('invalid_url');
-
-// Missing protocols
-await mockWallet.simulateError('missing_protocols');
-
-// Invalid protocol identifier
-await mockWallet.simulateError('invalid_protocol');
-
-// Registration timeout
-await mockWallet.simulateError('registration_timeout');
-
-// Non-function verifier
-await mockWallet.simulateError('verifier_not_function');
+mockWallet.register()              // Register wallet with extension
+mockWallet.checkRegistration()     // Check if wallet is registered
+mockWallet.sendResponse(approved)  // Send credential response (true=approve, false=deny)
 ```
 
-### Usage in Tests
+#### Activity Log
 
 ```javascript
-const page = await browser.newPage();
-const mockWalletPath = path.join(__dirname, 'fixtures', 'mock-wallet.html');
+mockWallet.getLog()    // Get activity log array: [{ id, time, message }, ...]
+mockWallet.clearLog()  // Clear the activity log
+```
 
-// Load with auto-registration disabled
-await page.goto(`file://${mockWalletPath}?auto-register=false`);
-await new Promise(resolve => setTimeout(resolve, 1000));
+#### Test Isolation
 
-// Reset state
-await page.evaluate(() => window.mockWallet.reset());
+```javascript
+mockWallet.reset()  // Reset all state (registration, request, log, mock data)
+```
 
-// Register with custom config
-const result = await page.evaluate(async () => {
-  return await window.mockWallet.register({
-    name: 'Test Wallet',
-    url: 'https://test.local',
-    protocols: ['openid4vp']
-  });
-});
+#### Mock Data Overrides
 
-// Verify state
-const state = await page.evaluate(() => window.mockWallet.getState());
-expect(state.registered).toBe(true);
+```javascript
+// Override user claims returned in credentials
+mockWallet.setMockUserData({ given_name: 'Jane', family_name: 'Smith' })
+mockWallet.getMockUserData()  // Get current mock user data
 
-// Register JWT verifier
-await page.evaluate(async () => {
-  return await window.mockWallet.registerVerifier();
-});
+// Override accepted credential types
+mockWallet.setAcceptedTypes(['urn:custom:credential'])
+mockWallet.getAcceptedTypes()  // Get current accepted types
+```
 
-// Check call history
-const history = await page.evaluate(() => window.mockWallet.getCallHistory());
-expect(history.length).toBeGreaterThan(0);
+#### Async Wait Helpers
+
+```javascript
+await mockWallet.waitForExtension(timeout)     // Wait for extension detection (default: 5000ms)
+await mockWallet.waitForRegistration(timeout)  // Wait for wallet registration (default: 5000ms)
+await mockWallet.waitForRequest(timeout)       // Wait for credential request (default: 10000ms)
+```
+
+#### Configuration
+
+```javascript
+mockWallet.config  // { name, url, protocols, description, icon, color }
 ```
 
 ### Query Parameters
 
-- `auto-register=false` - Disable automatic registration on load
+- `?auto-register=true` — Automatically register wallet on page load
 
-### Default Configuration
+### `data-testid` Selectors
 
-```javascript
-{
-  name: 'Mock Wallet',
-  url: 'https://mock-wallet.test.local',
-  protocols: ['openid4vp', 'w3c-vc'],
-  description: 'Mock wallet for integration testing',
-  icon: '🧪',
-  color: '#10b981'
-}
-```
+| Selector | Element |
+|----------|---------|
+| `extension-status` | Extension status flash message |
+| `register-button` | Register wallet button |
+| `check-registration-button` | Check registration button |
+| `request-dialog` | Credential request dialog |
+| `approve-button` | Approve/send credential button |
+| `deny-button` | Deny/cancel request button |
 
-### Call History Format
+---
 
-Each entry in the call history includes:
+## Mock Verifier (`mock-verifier.html`)
 
-```javascript
-{
-  action: string,        // Action name (e.g., 'register', 'registerVerifier')
-  data: Object,          // Request/response data
-  timestamp: string      // ISO timestamp
-}
-```
+A test page for triggering Digital Credentials API requests via `navigator.credentials.get()`.
 
-### Debugging
+### Features
 
-The mock wallet logs to the browser console:
+- **Preset test scenarios** — Basic identity, age verification, full profile, multi-credential
+- **Custom requests** — Run arbitrary DCQL queries
+- **Response decoding** — Automatically decodes SD-JWT and mso_mdoc responses
+- **Playwright-friendly** — Exposes `window.mockVerifier` API for test automation
+- **Activity logging** — Tracks all operations for test assertions
 
-```javascript
-[Mock Wallet] Initializing mock wallet...
-[Mock Wallet] Registering wallet...
-[Mock Wallet] JWT verifier called { jwt: '...', options: {...} }
-```
+### API Reference (`window.mockVerifier`)
 
-Access the mock wallet interface in the browser console:
+#### State Access
 
 ```javascript
-window.mockWallet.getState()
-window.mockWallet.getCallHistory()
+// Reactive state getter
+mockVerifier.state  // { extensionReady, resultVisible, lastRequest, lastResponse, lastError }
+
+// Snapshot function
+mockVerifier.getState()  // Same as above, but a plain object copy
 ```
 
-## Future Fixtures
+#### Action Triggers
 
-- `mock-verifier.html` - Mock verifier page for OpenID4VP requests
-- `test-credentials.json` - Sample credential data for testing
+```javascript
+mockVerifier.runTest('basic')       // Run preset test: 'basic', 'age', 'profile', 'multi'
+mockVerifier.runCustomTest(request) // Run custom navigator.credentials.get() request
+```
+
+#### Response Access
+
+```javascript
+mockVerifier.getLastResponse()   // Get raw credential response
+mockVerifier.getDecodedTokens()  // Get decoded VP tokens: [{ id, format, decoded }, ...]
+```
+
+#### Test Configs
+
+```javascript
+mockVerifier.getTestConfigs()  // Get all preset test configurations
+mockVerifier.generateNonce()   // Generate cryptographically random nonce
+```
+
+#### Activity Log
+
+```javascript
+mockVerifier.getLog()    // Get activity log array: [{ id, time, message }, ...]
+mockVerifier.clearLog()  // Clear the activity log
+```
+
+#### Test Isolation
+
+```javascript
+mockVerifier.reset()  // Reset all state (results, response, error, log)
+```
+
+#### Async Wait Helpers
+
+```javascript
+await mockVerifier.waitForExtension(timeout)  // Wait for DC API support (default: 5000ms)
+await mockVerifier.waitForResponse(timeout)   // Wait for credential response (default: 30000ms)
+```
+
+### Preset Test Scenarios
+
+| Test ID | Description | Claims Requested |
+|---------|-------------|------------------|
+| `basic` | Basic identity | `given_name`, `family_name` |
+| `age` | Age verification | `age_over_18` (with value matching) |
+| `profile` | Full profile | name, email, address fields |
+| `multi` | Multiple credentials | SD-JWT + mso_mdoc with credential_sets |
+
+### `data-testid` Selectors
+
+| Selector | Element |
+|----------|---------|
+| `extension-status` | Extension status flash message |
+| `test-basic` | Basic identity test button |
+| `test-age` | Age verification test button |
+| `test-profile` | Full profile test button |
+| `test-multi` | Multi-credential test button |
+| `result-status` | Result status flash message |
+| `result-data` | Result data pre element |
+
+---
+
+## Playwright Usage Examples
+
+### Setup and Register Wallet
+
+```javascript
+// Navigate and wait for extension
+await walletPage.goto('/fixtures/mock-wallet.html');
+await walletPage.evaluate(() => window.mockWallet.waitForExtension());
+
+// Register via API (fast)
+await walletPage.evaluate(() => window.mockWallet.register());
+await walletPage.evaluate(() => window.mockWallet.waitForRegistration());
+
+// OR register via UI (tests real flow)
+await walletPage.click('[data-testid="register-button"]');
+```
+
+### Request and Approve Credential
+
+```javascript
+// On verifier page: trigger request
+await verifierPage.evaluate(() => window.mockVerifier.runTest('basic'));
+
+// On wallet page: wait for and approve request
+await walletPage.evaluate(() => window.mockWallet.waitForRequest());
+await walletPage.click('[data-testid="approve-button"]');
+
+// On verifier page: verify response
+const response = await verifierPage.evaluate(() => window.mockVerifier.waitForResponse());
+expect(response.data.vp_token).toBeDefined();
+```
+
+### Test Isolation
+
+```javascript
+beforeEach(async () => {
+  await walletPage.evaluate(() => window.mockWallet.reset());
+  await verifierPage.evaluate(() => window.mockVerifier.reset());
+});
+```
+
+### Assert Activity Log
+
+```javascript
+const log = await walletPage.evaluate(() => window.mockWallet.getLog());
+expect(log.some(e => e.message.includes('registered'))).toBe(true);
+```
+
+### Custom Mock Data
+
+```javascript
+await walletPage.evaluate(() => {
+  window.mockWallet.setMockUserData({
+    given_name: 'Alice',
+    age_over_18: false  // Test rejection scenario
+  });
+});
+```
+
+---
+
+## Files
+
+| File | Purpose |
+|------|---------|
+| `mock-wallet.html` | Wallet test page |
+| `mock-wallet.js` | Wallet Alpine.js component |
+| `mock-verifier.html` | Verifier test page |
+| `mock-verifier.js` | Verifier Alpine.js component |
+| `style.css` | Shared Primer CSS styles |

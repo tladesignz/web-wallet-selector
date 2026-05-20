@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" data-color-mode="light" data-light-theme="light">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Mock Verifier - Test Fixture</title>
+		<link rel="stylesheet" href="style.css" />
+	</head>
+	<body>
+		<div class="container-md p-4" x-data="verifierApp()" x-init="init()">
+			<div class="d-flex flex-justify-between flex-items-center mb-1">
+				<h1 class="h2 mb-0">Mock Verifier</h1>
+				<a href="/" class="btn btn-sm mr-2">Home</a>
+			</div>
+			<p class="color-fg-muted mb-4">Digital Credentials API Relying Party Test Fixture</p>
+
+			<div class="Box p-3 mb-3">
+				<h2 class="f4 mb-2">Extension Status</h2>
+				<div class="flash" :class="extensionStatusClass" x-text="extensionStatusText" data-testid="extension-status"></div>
+			</div>
+
+			<div class="Box p-3 mb-3">
+				<h2 class="f4 mb-2">Credential Request Tests</h2>
+				<p class="color-fg-muted f6 mb-3">Select a test scenario to request credentials via the Digital Credentials API.</p>
+
+				<div class="test-grid">
+					<div class="Box color-bg-subtle p-3">
+						<h3 class="f5 mb-1">Basic Identity</h3>
+						<p class="f6 color-fg-muted mb-2">Request name claims from an identity credential.</p>
+						<button class="btn btn-primary btn-sm" @click="runTest('basic')" data-testid="test-basic">Request Credential</button>
+					</div>
+
+					<div class="Box color-bg-subtle p-3">
+						<h3 class="f5 mb-1">Age Verification</h3>
+						<p class="f6 color-fg-muted mb-2">Request age_over_18 with value matching.</p>
+						<button class="btn btn-primary btn-sm" @click="runTest('age')" data-testid="test-age">Verify Age</button>
+					</div>
+
+					<div class="Box color-bg-subtle p-3">
+						<h3 class="f5 mb-1">Full Profile</h3>
+						<p class="f6 color-fg-muted mb-2">Request multiple claims: name, email, address.</p>
+						<button class="btn btn-primary btn-sm" @click="runTest('profile')" data-testid="test-profile">Request Profile</button>
+					</div>
+
+					<div class="Box color-bg-subtle p-3">
+						<h3 class="f5 mb-1">Multiple Credentials</h3>
+						<p class="f6 color-fg-muted mb-2">Request from multiple credential types.</p>
+						<button class="btn btn-primary btn-sm" @click="runTest('multi')" data-testid="test-multi">Multi-Credential</button>
+					</div>
+				</div>
+			</div>
+
+			<div class="Box p-3 mb-3" x-show="resultVisible" x-cloak>
+				<h2 class="f4 mb-2">Result</h2>
+				<div class="flash mb-2" :class="resultStatusClass" x-text="resultStatusText" data-testid="result-status"></div>
+				<pre class="p-2 rounded-2 color-bg-subtle" x-text="resultData" data-testid="result-data"></pre>
+			</div>
+
+			<div class="Box p-3 mb-3" x-show="decodedTokens.length > 0" x-cloak>
+				<h2 class="f4 mb-2">Decoded Credentials</h2>
+				<template x-for="token in decodedTokens" :key="token.id">
+					<div class="mb-3">
+						<h3 class="f5 mb-1" x-text="token.id"></h3>
+						<span class="Label Label--secondary mb-2" x-text="token.format"></span>
+						<pre class="p-2 rounded-2 color-bg-subtle f6 mt-2" x-text="token.decoded"></pre>
+					</div>
+				</template>
+			</div>
+
+			<div class="Box p-3 mb-3">
+				<h2 class="f4 mb-2">Last Request</h2>
+				<pre class="p-2 rounded-2 color-bg-subtle f6" x-text="lastRequest"></pre>
+			</div>
+		</div>
+
+		<script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+		<script src="mock-verifier.js"></script>
+	</body>
+</html>
