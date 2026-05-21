@@ -51,7 +51,7 @@ export const ShowWalletSelector = defineMessage(
 				protocol: string(),
 			}),
 		),
-		options: unknown(),
+		options: optional(unknown()),
 	},
 	{
 		useNative: nullish(boolean()),
