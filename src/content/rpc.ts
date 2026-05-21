@@ -37,12 +37,13 @@ export class RPC {
 			if (e.data?.channel !== this.#channel) return;
 
 			// Response to our request
-			const pending = this.#pending.get(e.data.id);
-			if (pending) {
-				if ('response' in e.data) pending.resolve(e.data.response);
-				else if ('error' in e.data) pending.reject(e.data.error);
-
-				this.#pending.delete(e.data.id);
+			if ('response' in e.data || 'error' in e.data) {
+				const pending = this.#pending.get(e.data.id);
+				if (pending) {
+					if ('response' in e.data) pending.resolve(e.data.response);
+					else pending.reject(e.data.error);
+					this.#pending.delete(e.data.id);
+				}
 				return;
 			}
 
