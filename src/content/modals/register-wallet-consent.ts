@@ -100,8 +100,26 @@ export function registerWalletConsentModal({
 
 		const modal = createModal(name, url);
 
+		const style = document.createElement('style');
+		style.textContent = STYLES;
+
+		shadow.append(style, modal);
+
+		modal.show();
+
+		const handleKeydown = (event: KeyboardEvent) => {
+			if (event.key !== 'Escape') return;
+
+			event.preventDefault();
+			dismiss();
+			resolve({ status: 'declined' });
+		}
+
+		document.addEventListener('keydown', handleKeydown);
+
 		// Remove the host, not just the dialog
 		const dismiss = () => {
+			document.removeEventListener('keydown', handleKeydown);
 			const fallback = setTimeout(() => host.remove(), 350);
 			modal.addEventListener(
 				'animationend',
@@ -113,20 +131,6 @@ export function registerWalletConsentModal({
 			);
 			modal.classList.add('-closing');
 		};
-
-		const style = document.createElement('style');
-		style.textContent = STYLES;
-
-		shadow.append(style, modal);
-		modal.show();
-
-		document.addEventListener('keydown', (event) => {
-			if (event.key !== 'Escape') return;
-
-			event.preventDefault();
-			dismiss();
-			resolve({ status: 'declined' });
-		});
 
 		const closeButton = modal.querySelector<HTMLButtonElement>(
 			'.register-wallet > .header > .close',
