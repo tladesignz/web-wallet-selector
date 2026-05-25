@@ -8,10 +8,10 @@
 	color: var(--s-color-gray-950);
 	border: var(--s-border-light);
 	border-radius: var(--s-border-radius-md);
-	animation: fadeInLeft 0.3s ease-out;
+	animation: fadeInLeft 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 
 	&.-closing {
-		animation: fadeOutRight 0.3s ease-out;
+		animation: fadeOutRight 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 	}
 
 	> .header {
