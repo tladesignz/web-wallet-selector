@@ -461,7 +461,7 @@ function walletApp() {
 							requestId: requestId,
 							response: credential,
 						},
-						this.currentRequest.response_uri || '*',
+						new URL(this.currentRequest.response_uri)?.origin || '*',
 					);
 
 					this.addLog(`Credential sent for request ${requestId}`);
@@ -480,7 +480,7 @@ function walletApp() {
 							requestId: requestId,
 							error: 'user_cancelled',
 						},
-						this.currentRequest.response_uri || '*',
+						new URL(this.currentRequest.response_uri)?.origin || '*',
 					);
 
 					this.addLog(`Request ${requestId} denied by user`);
