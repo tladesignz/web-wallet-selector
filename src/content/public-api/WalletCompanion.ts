@@ -80,6 +80,14 @@ export class WalletCompanion implements WalletCompanionInterface {
 
 		const walletRegistration = parse(WalletRegistrationInputSchema, walletInfo);
 
+		const alreadyRegistered = await this.isWalletRegistered(walletRegistration.url);
+		if (alreadyRegistered) {
+			return {
+				success: false,
+				alreadyRegistered: true,
+			};
+		}
+
 		const consentResult = await registerWalletConsentModal({
 			name: walletInfo.name,
 			url: walletInfo.url,
