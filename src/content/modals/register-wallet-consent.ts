@@ -8,9 +8,7 @@ type RegisterWalletConsentModalOptions = {
 	url: string;
 };
 
-type RegisterWalletConsentModalResult =
-	| { status: 'approved' | 'declined' }
-	| { status: 'error'; error: string };
+type RegisterWalletConsentModalResult = { status: 'approved' | 'declined' };
 
 const HOST_ID = 'wc-register-wallet-host';
 
@@ -95,6 +93,7 @@ export function registerWalletConsentModal({
 		}
 
 		const host = document.createElement('div');
+		host.style.opacity = '1';
 		host.id = HOST_ID;
 		const shadow = host.attachShadow({ mode: 'closed' });
 		document.body.appendChild(host);
@@ -103,7 +102,15 @@ export function registerWalletConsentModal({
 
 		// Remove the host, not just the dialog
 		const dismiss = () => {
-			modal.addEventListener('animationend', () => host.remove(), { once: true });
+			const fallback = setTimeout(() => host.remove(), 350);
+			modal.addEventListener(
+				'animationend',
+				() => {
+					clearTimeout(fallback);
+					host.remove();
+				},
+				{ once: true },
+			);
 			modal.classList.add('-closing');
 		};
 
@@ -117,6 +124,7 @@ export function registerWalletConsentModal({
 			'.register-wallet > .header > .close',
 		);
 		if (!closeButton) {
+			host.remove();
 			reject(new Error('Failed to create modal: missing close button'));
 			return;
 		}
@@ -131,6 +139,7 @@ export function registerWalletConsentModal({
 			'.buttons > .s-button[data-action="decline"]',
 		);
 		if (!declineButton) {
+			host.remove();
 			reject(new Error('Failed to create modal: missing decline button'));
 			return;
 		}

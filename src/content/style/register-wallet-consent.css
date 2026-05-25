@@ -14,11 +14,6 @@
 		animation: fadeOutRight 0.3s ease-out;
 	}
 
-	&::backdrop {
-		background: transparent;
-		pointer-events: none;
-	}
-
 	> .header {
 		display: flex;
 		align-items: center;
