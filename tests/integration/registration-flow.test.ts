@@ -34,6 +34,11 @@ vi.mock('../../src/shared/runtime', () => ({
 	runtimeSendMessage: vi.fn(),
 }));
 
+// Mock consent modal (returns approved by default)
+vi.mock('../../src/content/modals/register-wallet-consent', () => ({
+	registerWalletConsentModal: vi.fn().mockResolvedValue({ status: 'approved' }),
+}));
+
 const mockStores = {
 	wallets: {
 		getAll: vi.mocked(Stores.wallets.getAll),
@@ -175,9 +180,9 @@ describe('Registration Flow Integration', () => {
 				protocols: ['openid4vp-v1-unsigned'],
 			});
 
-			expect(secondResult.success).toBe(true);
+			expect(secondResult.success).toBe(false);
 			expect(secondResult.alreadyRegistered).toBe(true);
-			expect(secondResult.wallet?.name).toBe('Original Wallet'); // Returns original
+			// Note: wallet info is not returned when already registered
 			expect(storedWallets).toHaveLength(1); // Only one wallet stored
 		});
 
@@ -317,19 +322,9 @@ describe('Registration Flow Integration', () => {
 			// Initially empty (mocked to return empty protocols)
 			expect(walletCompanion.supportedProtocols).toEqual([]);
 
-			// Mock GET_SUPPORTED_PROTOCOLS to return the registered protocols
-			// After registration, the handler aggregates protocols from all wallets
-			mockStores.wallets.getAll.mockImplementation(() =>
-				Promise.resolve([
-					{
-						id: 'w1',
-						name: 'Test',
-						url: 'https://test.com',
-						protocols: ['openid4vp', 'openid4vp-v1-unsigned'],
-						enabled: true,
-					},
-				]),
-			);
+			mockStores.wallets.setAll.mockImplementation(async (wallets) => {
+				mockStores.wallets.getAll.mockResolvedValue(wallets);
+			});
 
 			await walletCompanion.registerWallet({
 				name: 'Test Wallet',
