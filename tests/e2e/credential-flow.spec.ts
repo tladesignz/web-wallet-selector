@@ -23,6 +23,11 @@ test.describe('Credential Request Interception', () => {
 	test.beforeEach(async ({ page, testServer }) => {
 		// Register a wallet so there's something to select
 		await page.goto(`${testServer.url}/mock-wallet.html?auto-register=true`);
+
+		const approveButton = page.locator('#wc-register-wallet-host button[data-action="approve"]');
+		await approveButton.waitFor({ state: 'visible', timeout: 10000 });
+		await approveButton.click();
+
 		await page.waitForFunction(
 			() => {
 				const w = window as { mockWallet?: { state?: { registered: boolean } } };
@@ -155,6 +160,11 @@ test.describe('Credential Request Interception', () => {
 test.describe('Credential Request Types', () => {
 	test.beforeEach(async ({ page, testServer }) => {
 		await page.goto(`${testServer.url}/mock-wallet.html?auto-register=true`);
+
+		const approveButton = page.locator('#wc-register-wallet-host button[data-action="approve"]');
+		await approveButton.waitFor({ state: 'visible', timeout: 10000 });
+		await approveButton.click();
+
 		await page.waitForFunction(
 			() => {
 				const w = window as { mockWallet?: { state?: { registered: boolean } } };
@@ -257,6 +267,11 @@ interface MockWalletState {
 test.describe('Complete Credential Flow', () => {
 	test.beforeEach(async ({ page, testServer }) => {
 		await page.goto(`${testServer.url}/mock-wallet.html?auto-register=true`);
+
+		const approveButton = page.locator('#wc-register-wallet-host button[data-action="approve"]');
+		await approveButton.waitFor({ state: 'visible', timeout: 10000 });
+		await approveButton.click();
+
 		await page.waitForFunction(
 			() => {
 				const w = window as { mockWallet?: { state?: { registered: boolean } } };

@@ -122,10 +122,19 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
 			throw new Error('No extension service worker found');
 		}
 		const extensionId = extensionWorker.url().split('/')[2];
+
+		// Clear extension storage before each test for isolation
+		await extensionWorker.evaluate(() => {
+			// @ts-expect-error Accessing chrome API in service worker context
+			return chrome.storage.local.clear();
+		});
+
 		await use(extensionId);
 	},
 
-	page: async ({ extensionContext, testServer }, use) => {
+	page: async ({ extensionContext, extensionId, testServer }, use) => {
+		// extensionId fixture clears storage before each test
+		void extensionId; // Ensure dependency is satisfied
 		const page = await extensionContext.newPage();
 		await page.goto(testServer.url, { waitUntil: 'domcontentloaded' });
 		await use(page);

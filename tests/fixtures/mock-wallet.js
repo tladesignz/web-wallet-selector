@@ -83,6 +83,10 @@ function walletApp() {
 		},
 
 		async init() {
+			// Guard against double initialization (Alpine may re-run init)
+			if (this._initialized) return;
+			this._initialized = true;
+
 			const self = this;
 
 			// Set up watcher first
@@ -239,21 +243,32 @@ function walletApp() {
 		async registerWallet() {
 			if (!this.extensionReady) {
 				this.addLog('Cannot register: extension not ready');
-				return;
+				throw new Error('Extension not ready');
 			}
 
 			try {
 				this.addLog('Registering wallet...');
 				const result = await window.WalletCompanion.registerWallet(WALLET_CONFIG);
 
+				if (!result.success && !result.alreadyRegistered) {
+					this.addLog('Registration declined by user');
+					this.extensionStatusClass = 'flash-warn';
+					this.extensionStatusText = 'Registration declined';
+					throw new Error('User declined wallet registration');
+				}
+
 				this.registered = true;
-				this.walletId = result.wallet?.id;
 
 				if (result.alreadyRegistered) {
+					const isReg = await window.WalletCompanion.isWalletRegistered(WALLET_CONFIG.url);
+					if (isReg) {
+						this.walletId = result.wallet?.id || 'already-registered';
+					}
 					this.extensionStatusClass = 'flash-success';
 					this.extensionStatusText = 'Wallet already registered';
-					this.addLog(`Wallet already registered: ${result.wallet?.id}`);
+					this.addLog(`Wallet already registered`);
 				} else {
+					this.walletId = result.wallet?.id;
 					this.extensionStatusClass = 'flash-success';
 					this.extensionStatusText = 'Wallet registered successfully';
 					this.addLog(`Wallet registered: ${result.wallet?.id}`);
@@ -262,6 +277,7 @@ function walletApp() {
 				this.addLog(`Registration failed: ${error.message}`);
 				this.extensionStatusClass = 'flash-error';
 				this.extensionStatusText = `Error: ${error.message}`;
+				throw error;
 			}
 		},
 
