@@ -1,206 +1,132 @@
-# Makefile for DC API Interceptor Browser Extensions
+# Makefile for Wallet Companion Browser Extensions
 
 .PHONY: help install clean build build-chrome build-firefox build-safari \
-        watch watch-chrome watch-firefox watch-safari \
-        package package-chrome package-firefox \
-        dev-firefox lint test all \
-        changeset version tag prerelease-mode
+		watch watch-chrome watch-firefox watch-safari \
+		package package-chrome package-firefox \
+		dev-chrome dev-firefox dev-safari \
+		lint lint-fix format test test-watch test-coverage test-all typecheck \
+		check-deps status all rebuild \
+		changeset version tag prerelease-mode
 
-# Default target
 .DEFAULT_GOAL := help
 
-# Colors for output
-BLUE := \033[0;34m
-GREEN := \033[0;32m
-YELLOW := \033[0;33m
-RED := \033[0;31m
-NC := \033[0m # No Color
+DIST := dist
 
-# Directories
-SRC_DIR := src
-DIST_DIR := dist
-
-help: ## Show this help message
-	@echo "$(BLUE)DC API Interceptor - Browser Extension Build System$(NC)"
+help: ## Show this help
+	@echo "Wallet Companion - Browser Extension Build System"
 	@echo ""
-	@echo "$(GREEN)Available targets:$(NC)"
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(YELLOW)%-20s$(NC) %s\n", $$1, $$2}'
-	@echo ""
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
+		awk 'BEGIN {FS = ":.*?## "}; {printf "  %-18s %s\n", $$1, $$2}'
 
-install: ## Install Node.js dependencies
-	@echo "$(BLUE)Installing dependencies...$(NC)"
+install: ## Install dependencies
 	pnpm install
-	@echo "$(GREEN)✓ Dependencies installed$(NC)"
 
-clean: ## Clean built files and prepare for git
-	@echo "$(BLUE)Cleaning built files...$(NC)"
-	rm -rf $(DIST_DIR)
-	@echo "$(BLUE)Cleaning test artifacts...$(NC)"
-	rm -rf coverage/
-	rm -rf .nyc_output/
-	rm -rf node_modules/.cache/
-	@echo "$(BLUE)Cleaning editor artifacts...$(NC)"
-	find . -type f -name '.DS_Store' -delete
-	find . -type f -name 'Thumbs.db' -delete
-	find . -type f -name '*~' -delete
-	find . -type f -name '*.swp' -delete
-	find . -type f -name '*.swo' -delete
-	@echo "$(BLUE)Cleaning log files...$(NC)"
-	find . -type f -name '*.log' -delete
-	@echo "$(GREEN)✓ Cleaned and ready for git$(NC)"
+clean: ## Clean build artifacts
+	pnpm clean
+	rm -rf coverage .nyc_output node_modules/.cache
+	find . -type f \( -name '.DS_Store' -o -name 'Thumbs.db' -o -name '*~' \
+		-o -name '*.swp' -o -name '*.swo' -o -name '*.log' \) -delete
 
-# Build targets
-build: build-chrome build-firefox build-safari ## Build extensions for all browsers
+# Build
+build: ## Build all browsers
+	pnpm build
 
-build-chrome: ## Build Chrome extension
-	@echo "$(BLUE)Building Chrome extension...$(NC)"
-	BROWSER=chrome pnpm vite build
-	@echo "$(GREEN)✓ Chrome extension built$(NC)"
+build-chrome: ## Build Chrome
+	pnpm build:chrome
 
-build-firefox: ## Build Firefox extension
-	@echo "$(BLUE)Building Firefox extension...$(NC)"
-	BROWSER=firefox pnpm vite build
-	@echo "$(GREEN)✓ Firefox extension built$(NC)"
+build-firefox: ## Build Firefox
+	pnpm build:firefox
 
-build-safari: ## Build Safari extension
-	@echo "$(BLUE)Building Safari extension...$(NC)"
-	BROWSER=safari pnpm vite build
-	@echo "$(GREEN)✓ Safari extension built$(NC)"
+build-safari: ## Build Safari
+	pnpm build:safari
 
-# Watch targets for development
-watch: watch-chrome ## Watch mode (default: Chrome)
+# Watch
+watch: ## Watch Chrome (default)
+	pnpm watch
 
-watch-chrome: ## Watch and rebuild Chrome extension on changes
-	@echo "$(BLUE)Watching Chrome extension for changes...$(NC)"
-	BROWSER=chrome pnpm vite build --watch
+watch-chrome: ## Watch Chrome
+	pnpm watch:chrome
 
-watch-firefox: ## Watch and rebuild Firefox extension on changes
-	@echo "$(BLUE)Watching Firefox extension for changes...$(NC)"
-	BROWSER=firefox pnpm vite build --watch
+watch-firefox: ## Watch Firefox
+	pnpm watch:firefox
 
-watch-safari: ## Watch and rebuild Safari extension on changes
-	@echo "$(BLUE)Watching Safari extension for changes...$(NC)"
-	BROWSER=safari pnpm vite build --watch
+watch-safari: ## Watch Safari
+	pnpm watch:safari
 
-# Package targets
-package: package-chrome package-firefox ## Package extensions for distribution
+# Package
+package: package-chrome package-firefox ## Package all browsers
 
-package-chrome: build-chrome ## Package Chrome extension as ZIP
-	@echo "$(BLUE)Packaging Chrome extension...$(NC)"
-	cd $(DIST_DIR)/chrome && zip -r ../chrome-extension.zip . -x '*.git*' -x 'README.md'
-	@echo "$(GREEN)✓ Chrome extension packaged: $(DIST_DIR)/chrome-extension.zip$(NC)"
+package-chrome: build-chrome ## Package Chrome as ZIP
+	pnpm package:chrome
 
-package-firefox: build-firefox ## Package Firefox extension as XPI
-	@echo "$(BLUE)Packaging Firefox extension...$(NC)"
-	cd $(DIST_DIR)/firefox && zip -r ../firefox-extension.xpi . -x '*.git*' -x 'README.md'
-	@echo "$(GREEN)✓ Firefox extension packaged: $(DIST_DIR)/firefox-extension.xpi$(NC)"
+package-firefox: build-firefox ## Package Firefox as XPI
+	pnpm package:firefox
 
-# Development targets
-dev-firefox: ## Run Firefox with the extension loaded (requires build)
-	@echo "$(BLUE)Starting Firefox with extension...$(NC)"
+# Development
+dev-chrome: ## Open Chrome extensions page
+	@echo "Load extension from: $(DIST)/chrome"
+	@command -v google-chrome >/dev/null && google-chrome chrome://extensions/ || \
+	 command -v chromium >/dev/null && chromium chrome://extensions/ || \
+	 echo "Chrome not found"
+
+dev-firefox: ## Run Firefox with extension
 	pnpm dev:firefox
 
-dev-chrome: ## Open Chrome extensions page (manual load required)
-	@echo "$(YELLOW)Opening Chrome extensions page...$(NC)"
-	@echo "$(YELLOW)Load the extension from: $(DIST_DIR)/chrome$(NC)"
-	@if command -v google-chrome >/dev/null 2>&1; then \
-		google-chrome chrome://extensions/; \
-	elif command -v chromium >/dev/null 2>&1; then \
-		chromium chrome://extensions/; \
-	else \
-		echo "$(RED)Chrome/Chromium not found$(NC)"; \
-	fi
+dev-safari: build-safari ## Safari setup instructions
+	@echo "1. xcrun safari-web-extension-converter $(DIST)/safari/ --app-name 'Wallet Companion'"
+	@echo "2. Open Xcode project and run"
+	@echo "3. Enable in Safari Preferences > Extensions"
 
-# Safari requires Xcode, so we just provide information
-dev-safari: build-safari ## Instructions for Safari development
-	@echo "$(YELLOW)Safari Extension Development:$(NC)"
-	@echo ""
-	@echo "1. Convert to Safari Web Extension:"
-	@echo "   xcrun safari-web-extension-converter $(DIST_DIR)/safari/ --app-name 'Wallet Companion'"
-	@echo ""
-	@echo "2. Open the generated Xcode project and run it"
-	@echo ""
-	@echo "3. Enable the extension in Safari Preferences → Extensions"
-
-# Quality targets
-lint: ## Run ESLint on source files
-	@echo "$(BLUE)Running ESLint...$(NC)"
+# Quality
+lint: ## Run linter
 	pnpm lint
 
-test: ## Run unit tests
-	@echo "$(BLUE)Running tests...$(NC)"
-	pnpm test
+lint-fix: ## Fix lint errors
+	pnpm lint:fix
 
-typecheck: ## Run TypeScript type checking
-	@echo "$(BLUE)Type checking...$(NC)"
+format: ## Format code
+	pnpm format
+
+typecheck: ## Type check
 	pnpm typecheck
 
-# Utility targets
-check-deps: ## Check if required dependencies are installed
-	@echo "$(BLUE)Checking dependencies...$(NC)"
-	@command -v node >/dev/null 2>&1 || { echo "$(RED)✗ Node.js not found$(NC)"; exit 1; }
-	@command -v pnpm >/dev/null 2>&1 || { echo "$(RED)✗ pnpm not found$(NC)"; exit 1; }
-	@echo "$(GREEN)✓ Node.js $(shell node --version)$(NC)"
-	@echo "$(GREEN)✓ pnpm $(shell pnpm --version)$(NC)"
-	@if [ -d node_modules ]; then \
-		echo "$(GREEN)✓ Dependencies installed$(NC)"; \
-	else \
-		echo "$(YELLOW)⚠ Dependencies not installed. Run 'make install'$(NC)"; \
-	fi
+# Testing
+test: ## Run tests
+	pnpm test
 
-status: ## Show build status for all browsers
-	@echo "$(BLUE)Extension Build Status:$(NC)"
-	@echo ""
-	@echo "$(YELLOW)Chrome:$(NC)"
-	@if [ -f "$(DIST_DIR)/chrome/manifest.json" ]; then \
-		echo "  $(GREEN)✓ Built$(NC)"; \
-	else \
-		echo "  $(RED)✗ Not built$(NC)"; \
-	fi
-	@echo ""
-	@echo "$(YELLOW)Firefox:$(NC)"
-	@if [ -f "$(DIST_DIR)/firefox/manifest.json" ]; then \
-		echo "  $(GREEN)✓ Built$(NC)"; \
-	else \
-		echo "  $(RED)✗ Not built$(NC)"; \
-	fi
-	@echo ""
-	@echo "$(YELLOW)Safari:$(NC)"
-	@if [ -f "$(DIST_DIR)/safari/manifest.json" ]; then \
-		echo "  $(GREEN)✓ Built$(NC)"; \
-	else \
-		echo "  $(RED)✗ Not built$(NC)"; \
-	fi
-	@echo ""
-	@if [ -d "$(DIST_DIR)" ]; then \
-		echo "$(YELLOW)Packages:$(NC)"; \
-		ls -lh $(DIST_DIR)/*.zip $(DIST_DIR)/*.xpi 2>/dev/null || echo "  $(YELLOW)No packages$(NC)"; \
-	fi
+test-watch: ## Run tests in watch mode
+	pnpm test:watch
 
-all: clean install build package ## Clean, install, build and package everything
-	@echo "$(GREEN)✓ All tasks completed$(NC)"
+test-coverage: ## Run tests with coverage
+	pnpm test:coverage
 
-rebuild: clean build ## Clean and rebuild all extensions
+test-all: ## Run unit tests, build, and e2e tests
+	pnpm test:all
 
-# Development workflow shortcuts
-quick-chrome: build-chrome ## Quick build for Chrome (no clean)
-	@echo "$(GREEN)✓ Ready to reload in Chrome$(NC)"
+# Utility
+check-deps: ## Check dependencies
+	@node --version && pnpm --version
+	@test -d node_modules && echo "Dependencies installed" || echo "Run 'make install'"
 
-quick-firefox: build-firefox ## Quick build for Firefox (no clean)
-	@echo "$(GREEN)✓ Ready to reload in Firefox$(NC)"
+status: ## Show build status
+	@for browser in chrome firefox safari; do \
+		printf "%-8s " "$$browser:"; \
+		test -f $(DIST)/$$browser/manifest.json && echo "built" || echo "not built"; \
+	done
 
-quick-safari: build-safari ## Quick build for Safari (no clean)
-	@echo "$(GREEN)✓ Ready to reload in Safari$(NC)"
+all: clean install build package ## Full build pipeline
 
-# Versioning & Changesets
-changeset:
-	@pnpm changeset add
+rebuild: clean build ## Clean and rebuild
 
-version:
-	@pnpm dotenv -e .changeset/.env -- changeset version
+# Versioning
+changeset: ## Add changeset
+	pnpm changeset add
 
-tag:
-	@pnpm changeset tag
+version: ## Bump version
+	pnpm dotenv -e .changeset/.env -- changeset version
 
-prerelease-mode:
-	@pnpm changeset pre $(filter-out $@,$(MAKECMDGOALS))
+tag: ## Create git tag
+	pnpm changeset tag
+
+prerelease-mode: ## Enter/exit prerelease mode
+	pnpm changeset pre $(filter-out $@,$(MAKECMDGOALS))

@@ -7,6 +7,11 @@
 import { WalletCompanion } from '../../../../src/content/public-api/WalletCompanion';
 import type { RPC } from '../../../../src/content/rpc';
 
+// Mock consent modal (returns approved by default)
+vi.mock('@content/modals/register-wallet-consent', () => ({
+	registerWalletConsentModal: vi.fn().mockResolvedValue({ status: 'approved' }),
+}));
+
 // Create a mock RPC for testing
 function createMockRPC() {
 	return {
@@ -160,6 +165,7 @@ describe('WalletCompanion Class', () => {
 
 		it('should send REGISTER_WALLET RPC for valid input', async () => {
 			mockRPC.send.mockResolvedValueOnce({ protocols: [] }); // Constructor call
+			mockRPC.send.mockResolvedValueOnce({ isRegistered: false }); // CHECK_WALLET call
 			mockRPC.send.mockResolvedValueOnce({
 				success: true,
 				alreadyRegistered: false,
@@ -189,11 +195,7 @@ describe('WalletCompanion Class', () => {
 
 		it('should return alreadyRegistered true for existing wallet', async () => {
 			mockRPC.send.mockResolvedValueOnce({ protocols: [] }); // Constructor call
-			mockRPC.send.mockResolvedValueOnce({
-				success: true,
-				alreadyRegistered: true,
-				wallet: { id: 'existing', name: 'Existing', url: 'https://existing.com' },
-			});
+			mockRPC.send.mockResolvedValueOnce({ isRegistered: true }); // CHECK_WALLET call
 
 			const wc = new WalletCompanion(mockRPC);
 
@@ -203,6 +205,8 @@ describe('WalletCompanion Class', () => {
 				protocols: ['openid4vp'],
 			});
 
+			// When wallet is already registered, returns early with success: false
+			expect(result.success).toBe(false);
 			expect(result.alreadyRegistered).toBe(true);
 		});
 	});

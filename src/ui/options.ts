@@ -453,7 +453,10 @@ function handleEditNameChange(): void {
 	const nameInput = document.getElementById('edit-wallet-name');
 
 	if (!(urlInput instanceof HTMLInputElement) || !(nameInput instanceof HTMLInputElement)) {
-		console.error('handleEditNameChange: Missing required form inputs', { urlInput, nameInput });
+		console.error('handleEditNameChange: Missing required form inputs', {
+			urlInput,
+			nameInput,
+		});
 		return;
 	}
 
