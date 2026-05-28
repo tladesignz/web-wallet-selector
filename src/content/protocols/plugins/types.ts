@@ -44,6 +44,7 @@ export type DCQLQuery = {
 	}>;
 };
 
+/** @deprecated in favour of valibot schemas */
 export type RequestData = {
 	url?: string;
 	client_id: string;

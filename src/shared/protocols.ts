@@ -14,3 +14,13 @@ export enum OpenID4VPProtocols {
 	SIGNED = 'openid4vp-v1-signed',
 	MULTISIGNED = 'openid4vp-v1-multisigned',
 }
+
+export type Protocol = OpenID4VPProtocols;
+
+export function protocolsToArray() {
+	return [...Object.values(OpenID4VPProtocols)];
+}
+
+export function isProtocol(value: unknown): value is Protocol {
+	return protocolsToArray().includes(value as Protocol);
+}

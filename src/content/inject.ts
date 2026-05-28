@@ -3,10 +3,10 @@
  * Intercepts navigator.credentials.get() calls for the Digital Credentials API
  */
 
-import { OpenID4VPProtocols } from '@shared/protocols';
+import { isProtocol, type Protocol, protocolsToArray } from '@shared/protocols';
+import { DCGateway } from './dc-api/gateway';
+import type { PreparedRequest } from './dc-api/types';
 import { selectWalletModal } from './modals/select-wallet';
-import { OpenID4VPPlugin, ProtocolPluginRegistry } from './protocols/';
-import type { RequestData } from './protocols/plugins/types';
 import { WalletCompanion } from './public-api/WalletCompanion';
 import { RPC } from './rpc';
 import type { WalletOption } from './types';
@@ -17,20 +17,21 @@ const originalCredentialsGet = navigator.credentials.get.bind(navigator.credenti
 
 const rpc = new RPC();
 const publicAPI = new WalletCompanion(rpc);
+const dcGateway = new DCGateway();
 
-const protocolRegistry = new ProtocolPluginRegistry();
+// const protocolRegistry = new ProtocolPluginRegistry();
 
-for (const protocol of Object.values(OpenID4VPProtocols)) {
-	const variant =
-		protocol === OpenID4VPProtocols.NORMAL ? undefined : protocol.replace('openid4vp-', '');
-	protocolRegistry.register(new OpenID4VPPlugin(variant));
-}
+// for (const protocol of Object.values(OpenID4VPProtocols)) {
+// 	const variant =
+// 		protocol === OpenID4VPProtocols.NORMAL ? undefined : protocol.replace('openid4vp-', '');
+// 	protocolRegistry.register(new OpenID4VPPlugin(variant));
+// }
 
 // Override DigitalCredential.userAgentAllowsProtocol
 if (typeof DigitalCredential !== 'undefined') {
 	const original = DigitalCredential.userAgentAllowsProtocol?.bind(DigitalCredential);
 	DigitalCredential.userAgentAllowsProtocol = (protocol) => {
-		if (protocolRegistry.getSupportedProtocols().includes(protocol)) return true;
+		if (protocolsToArray().includes(protocol as Protocol)) return true;
 		return original?.(protocol) ?? false;
 	};
 }
@@ -56,36 +57,24 @@ navigator.credentials.get = async (options?: CredentialRequestOptions & DigitalI
 	}
 
 	// Filter by supported protocols
-	const supportedRequests = digitalRequests.filter((req) =>
-		protocolRegistry.getSupportedProtocols().includes(req.protocol),
+	const supportedRequests = digitalRequests.filter(
+		(req): req is { protocol: Protocol; data: unknown } => isProtocol(req.protocol),
 	);
 
 	if (supportedRequests.length === 0) {
 		return originalCredentialsGet(options);
 	}
 
-	// Prepare requests
-	const processedRequests = supportedRequests
-		.map((req) => {
-			try {
-				return {
-					protocol: req.protocol,
-					data: protocolRegistry.prepareRequest(req.protocol, req.data),
-				};
-			} catch {
-				return null;
-			}
-		})
-		.filter((req): req is ProcessedRequest => req !== null);
+	const preparedRequests = dcGateway.prepareRequests(supportedRequests);
 
-	if (processedRequests.length === 0) {
+	if (preparedRequests.length === 0) {
 		return originalCredentialsGet(options);
 	}
 
 	// Get wallets from content script
 	const { useNative, wallets } = await rpc.send<{ useNative?: boolean; wallets?: WalletOption[] }>(
 		'SHOW_WALLET_SELECTOR',
-		{ requests: processedRequests },
+		{ requests: preparedRequests },
 	);
 
 	if (useNative) {
@@ -97,7 +86,7 @@ navigator.credentials.get = async (options?: CredentialRequestOptions & DigitalI
 	}
 
 	// Show modal and wait for selection
-	const selection = await showWalletSelector(wallets, processedRequests);
+	const selection = await showWalletSelector(wallets, preparedRequests);
 
 	if (!selection) {
 		throw new DOMException('User cancelled', 'AbortError');
@@ -114,19 +103,18 @@ navigator.credentials.get = async (options?: CredentialRequestOptions & DigitalI
 	});
 
 	// Invoke wallet and wait for response
-	const response = await invokeWallet(
+	const response = await dcGateway.invoke(
 		selection.wallet,
 		selection.protocol,
 		selection.request,
 		requestId,
 	);
 
-	// Validate and return credential
-	const validated = protocolRegistry.validateResponse(selection.protocol, response);
+	// return credential for verifier to validate.
 	const credential = {
 		type: 'digital' as const,
 		protocol: selection.protocol,
-		data: validated,
+		data: response,
 		id: `credential-${Date.now()}`,
 	};
 
@@ -136,15 +124,15 @@ navigator.credentials.get = async (options?: CredentialRequestOptions & DigitalI
 	};
 };
 
-type ProcessedRequest = {
-	protocol: string;
-	data: RequestData | unknown;
+export type SupportedCredentialRequest = {
+	protocol: Protocol;
+	data: unknown;
 };
 
-type WalletSelection = {
+export type WalletSelection = {
 	wallet: WalletOption;
-	protocol: string;
-	request: ProcessedRequest;
+	protocol: Protocol;
+	request: PreparedRequest<unknown>;
 	useNative?: boolean;
 };
 
@@ -155,14 +143,16 @@ type SelectionResult = WalletSelection | { useNative: true } | null;
  */
 async function showWalletSelector(
 	wallets: WalletOption[],
-	requests: ProcessedRequest[],
+	requests: PreparedRequest<unknown>[],
 ): Promise<SelectionResult> {
 	return new Promise((resolve) => {
 		selectWalletModal({
 			wallets,
 			onSelect(wallet: WalletOption) {
 				const selectedRequest =
-					requests.find((req) => wallet.protocols?.includes(req.protocol)) ?? requests[0];
+					requests
+						.filter((req) => req !== null)
+						.find((req) => wallet.protocols?.includes(req.protocol)) ?? requests[0];
 
 				resolve({
 					wallet,
@@ -183,83 +173,83 @@ async function showWalletSelector(
 /**
  * Invoke wallet and wait for response
  */
-function invokeWallet(
-	wallet: WalletOption,
-	protocol: string,
-	request: ProcessedRequest,
-	requestId: string,
-): Promise<unknown> {
-	return new Promise((resolve, reject) => {
-		const walletUrl = buildWalletUrl(wallet, protocol, request, requestId);
+// function invokeWallet(
+// 	wallet: WalletOption,
+// 	protocol: string,
+// 	request: ProcessedRequest,
+// 	requestId: string,
+// ): Promise<unknown> {
+// 	return new Promise((resolve, reject) => {
+// 		const walletUrl = buildWalletUrl(wallet, protocol, request, requestId);
 
-		const timer = setTimeout(() => {
-			window.removeEventListener('message', handler);
-			reject(new DOMException('Wallet timeout', 'AbortError'));
-		}, 300000);
+// 		const timer = setTimeout(() => {
+// 			window.removeEventListener('message', handler);
+// 			reject(new DOMException('Wallet timeout', 'AbortError'));
+// 		}, 300000);
 
-		let win: WindowProxy | null;
+// 		let win: WindowProxy | null;
 
-		const handler = (e: MessageEvent) => {
-			if (e.origin !== new URL(wallet.url!).origin) return;
-			if (e.data?.type !== 'WC_WALLET_RESPONSE') return;
-			if (e.source !== win) {
-				console.warn('Ignoring response with mismatched source');
-				return;
-			}
-			if (e.data?.requestId !== requestId) {
-				console.debug('Ignoring response with mismatched requestId:', e.data?.requestId);
-				return;
-			}
+// 		const handler = (e: MessageEvent) => {
+// 			if (e.origin !== new URL(wallet.url!).origin) return;
+// 			if (e.data?.type !== 'WC_WALLET_RESPONSE') return;
+// 			if (e.source !== win) {
+// 				console.warn('Ignoring response with mismatched source');
+// 				return;
+// 			}
+// 			if (e.data?.requestId !== requestId) {
+// 				console.debug('Ignoring response with mismatched requestId:', e.data?.requestId);
+// 				return;
+// 			}
 
-			window.removeEventListener('message', handler);
-			clearTimeout(timer);
-			resolve(e.data.response);
-		};
+// 			window.removeEventListener('message', handler);
+// 			clearTimeout(timer);
+// 			resolve(e.data.response);
+// 		};
 
-		win = window.open(walletUrl, '_blank');
-		if (!win) {
-			clearTimeout(timer);
-			reject(new Error('Popup blocked'));
-			return;
-		}
+// 		win = window.open(walletUrl, '_blank');
+// 		if (!win) {
+// 			clearTimeout(timer);
+// 			reject(new Error('Popup blocked'));
+// 			return;
+// 		}
 
-		window.addEventListener('message', handler);
-	});
-}
+// 		window.addEventListener('message', handler);
+// 	});
+// }
 
 /**
  * Build wallet URL
  */
-function buildWalletUrl(
-	wallet: WalletOption,
-	protocol: string,
-	request: ProcessedRequest,
-	requestId: string,
-): string {
-	if (!wallet.url) throw new Error('Wallet URL is required');
-	const url = new URL(wallet.url);
+// function buildWalletUrl(
+// 	wallet: WalletOption,
+// 	protocol: string,
+// 	request: ProcessedRequest,
+// 	requestId: string,
+// ): string {
+// 	if (!wallet.url) throw new Error('Wallet URL is required');
+// 	const url = new URL(wallet.url);
 
-	// Always include request_id for response correlation
-	url.searchParams.set('request_id', requestId);
+// 	// Always include request_id for response correlation
+// 	url.searchParams.set('request_id', requestId);
 
-	if (protocol.startsWith('openid4vp')) {
-		const data = request.data as RequestData;
-		url.searchParams.set('client_id', window.location.origin);
-		url.searchParams.set('response_type', data.response_type || 'vp_token');
-		url.searchParams.set('response_mode', data.response_mode || 'dc_api');
-		if (data.nonce) url.searchParams.set('nonce', data.nonce);
-		url.searchParams.set('response_uri', window.location.href);
-		url.searchParams.set('client_metadata', JSON.stringify(data.client_metadata || {}));
-		url.searchParams.set('dcql_query', JSON.stringify(data.dcql_query || {}));
-		if (data.state) url.searchParams.set('state', data.state);
-	} else {
-		url.searchParams.set('request', JSON.stringify(request.data));
-		url.searchParams.set('protocol', protocol);
-		url.searchParams.set('origin', window.location.origin);
-	}
+// 	if (protocol.startsWith('openid4vp')) {
+// 		const data = request.data as RequestData;
+// 		url.searchParams.set('client_id', window.location.origin);
+// 		url.searchParams.set('response_type', data.response_type || 'vp_token');
+// 		url.searchParams.set('response_mode', data.response_mode || 'dc_api');
+// 		if (data.nonce) url.searchParams.set('nonce', data.nonce);
+// 		url.searchParams.set('response_uri', window.location.href);
+// 		url.searchParams.set('client_metadata', JSON.stringify(data.client_metadata || {}));
+// 		url.searchParams.set('dcql_query', JSON.stringify(data.dcql_query || {}));
+// 		if (data.state) url.searchParams.set('state', data.state);
+// 	} else {
+// 		url.searchParams.set('request', JSON.stringify(request.data));
+// 		url.searchParams.set('protocol', protocol);
+// 		url.searchParams.set('origin', window.location.origin);
+// 	}
 
-	return url.toString();
-}
+// 	return url.toString();
+// }
 
 window.WalletCompanion = publicAPI;
 console.debug('Digital Credentials API interception active');
