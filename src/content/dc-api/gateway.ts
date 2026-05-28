@@ -111,6 +111,7 @@ export class DCGateway {
 		}
 
 		this.#pending.delete(data.requestId);
+		clearTimeout(pending.timer);
 		pending.resolve(data.response);
 	}
 
