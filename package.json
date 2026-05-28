@@ -31,7 +31,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:all": "pnpm test:unit && pnpm test:integration && pnpm build:chrome && pnpm test:e2e",
-    "test:server": "tsx tests/support/serve.ts"
+    "test:server": "tsx tests/support/server.ts"
   },
   "keywords": [
     "browser-extension",
