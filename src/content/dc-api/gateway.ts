@@ -1,5 +1,5 @@
 import { OpenID4VPProtocols, type Protocol } from '@shared/protocols';
-import { type InferInput, literal, object, safeParse, string, unknown } from 'valibot';
+import { type InferInput, literal, object, optional, safeParse, string, unknown } from 'valibot';
 import type { WalletOption } from '../types';
 import { OpenID4VPDCHandler } from './handlers/openid4vp';
 import type { DCProtocolHandler, PreparedRequest, RawCredentialRequest } from './types';
@@ -8,7 +8,8 @@ export type DCResponse = InferInput<typeof DCResponseSchema>;
 const DCResponseSchema = object({
 	type: literal('WC_WALLET_RESPONSE'),
 	requestId: string(),
-	response: unknown(),
+	response: optional(unknown()),
+	error: optional(string()),
 });
 
 type Pending = {
@@ -113,7 +114,12 @@ export class DCGateway {
 
 		this.#pending.delete(data.requestId);
 		clearTimeout(pending.timer);
-		pending.resolve(data.response);
+
+		if (data.error) {
+			pending.reject(new DOMException(data.error, 'AbortError'));
+		} else {
+			pending.resolve(data.response);
+		}
 	}
 
 	#buildWalletUrl(
