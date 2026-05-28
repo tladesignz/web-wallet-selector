@@ -52,6 +52,33 @@ describe('OpenID4VPDCHandler', () => {
 			expect(result.protocol).toBe(OpenID4VPProtocols.NORMAL);
 			expect(result.client_metadata).toBeDefined();
 		});
+
+		it('should accept request with both client_metadata and dcql_query', () => {
+			const result = handler.prepareRequest({
+				client_metadata: { vp_formats_supported: { 'dc+sd-jwt': {} } },
+				dcql_query: validDcqlQuery,
+			});
+			expect(result.client_metadata).toBeDefined();
+			expect(result.dcql_query).toBeDefined();
+		});
+
+		it('should reject empty object', () => {
+			expect(() => handler.prepareRequest({})).toThrow();
+		});
+
+		it('should reject invalid response_type', () => {
+			expect(() => handler.prepareRequest({
+				dcql_query: validDcqlQuery,
+				response_type: 'invalid',
+			})).toThrow();
+		});
+
+		it('should reject invalid response_mode', () => {
+			expect(() => handler.prepareRequest({
+				dcql_query: validDcqlQuery,
+				response_mode: 'invalid',
+			})).toThrow();
+		});
 	});
 
 	describe('buildUrl', () => {
@@ -120,6 +147,28 @@ describe('OpenID4VPDCHandler', () => {
 				JSON.stringify(request.client_metadata),
 			);
 			expect(url.searchParams.get('dcql_query')).toBe(JSON.stringify(request.dcql_query));
+		});
+
+		it('should set response_uri to current page', () => {
+			const url = handler.buildUrl(wallet, request, 'req-123');
+			expect(url.searchParams.get('response_uri')).toBe(window.location.href);
+		});
+
+		it('should handle wallet URL with existing query params', () => {
+			const walletWithParams = { ...wallet, url: 'https://wallet.example.com?existing=param' };
+			const url = handler.buildUrl(walletWithParams, request, 'req-123');
+			expect(url.searchParams.get('existing')).toBe('param');
+			expect(url.searchParams.get('request_id')).toBe('req-123');
+		});
+
+		it('should set empty object for missing client_metadata', () => {
+			const url = handler.buildUrl(wallet, { dcql_query: validDcqlQuery }, 'req-123');
+			expect(url.searchParams.get('client_metadata')).toBe('{}');
+		});
+
+		it('should set empty object for missing dcql_query', () => {
+			const url = handler.buildUrl(wallet, { client_metadata: {} }, 'req-123');
+			expect(url.searchParams.get('dcql_query')).toBe('{}');
 		});
 	});
 });
