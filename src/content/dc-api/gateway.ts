@@ -78,6 +78,7 @@ export class DCGateway {
 			const url = this.#buildWalletUrl(wallet, protocol, request, requestId);
 
 			const timer = setTimeout(() => {
+				this.#pending.delete(requestId);
 				reject(new DOMException('Wallet timeout', 'AbortError'));
 			}, 300000);
 
