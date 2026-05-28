@@ -2,6 +2,7 @@ import type { WalletOption } from '@content/types';
 import type { OpenID4VPProtocols } from '@shared/protocols';
 import {
 	DCQLQuerySchema,
+	OpenID4VPClientMetadataSchema,
 	OpenID4VPResponseModeSchema,
 	OpenID4VPResponseTypeSchema,
 } from '@shared/schemas/protocols';
@@ -22,7 +23,7 @@ const OpenID4VPDCRequestSchema = pipe(
 	strictObject({
 		nonce: optional(string()),
 		state: optional(string()),
-		client_metadata: optional(unknown()), // TODO: types this.
+		client_metadata: optional(OpenID4VPClientMetadataSchema),
 		dcql_query: optional(DCQLQuerySchema),
 		response_type: optional(OpenID4VPResponseTypeSchema),
 		response_mode: optional(OpenID4VPResponseModeSchema),
