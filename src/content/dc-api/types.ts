@@ -1,26 +1,5 @@
-import type {
-	ClientMetadata,
-	DCQLQuery,
-	PresentationDefinition,
-} from '@content/protocols/plugins/types';
 import type { WalletOption } from '@content/types';
 import type { Protocol } from '@shared/protocols';
-
-/** @deprecated in favour of valibot schema */
-export type RequestData = {
-	url?: string;
-	client_id: string;
-	request_uri?: string;
-	response_uri?: string;
-	nonce?: string;
-	state?: string;
-	presentation_definition?: PresentationDefinition;
-	presentation_definition_uri?: string;
-	client_metadata?: ClientMetadata;
-	response_type?: 'vp_token' | 'vp_token id_token' | 'code';
-	response_mode?: 'direct_post' | 'dc_api' | `${'direct_post' | 'dc_api'}.jwt`;
-	dcql_query?: DCQLQuery;
-};
 
 /**
  * The raw request shape as received from the caller, before any protocol-specific
