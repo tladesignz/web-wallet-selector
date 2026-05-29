@@ -175,16 +175,13 @@ if (DigitalCredential.userAgentAllowsProtocol('openid4vp')) {
       requests: [{
         protocol: 'openid4vp',
         data: {
-          presentation_definition: {
-            id: 'age-verification',
-            input_descriptors: [{
-              id: 'age',
-              constraints: {
-                fields: [{
-                  path: ['$.credentialSubject.age'],
-                  filter: { type: 'number', minimum: 18 }
-                }]
-              }
+          dcql_query: {
+            credentials: [{
+              id: 'org.example.age_verification',
+              format: 'vc+sd-jwt',
+              claims: [
+                { path: ['age'], filter: { type: 'number', minimum: 18 } }
+              ]
             }]
           }
         }
@@ -253,9 +250,8 @@ registry.register(new CustomProtocolPlugin());
 {
   protocol: 'openid4vp',
   data: {
-    presentation_definition: {
-      id: string,
-      input_descriptors: [...]
+    dcql_query: {
+      credentials: [...]
     }
     // OR
     request_uri: string
@@ -266,13 +262,7 @@ registry.register(new CustomProtocolPlugin());
 **Response Structure:**
 ```javascript
 {
-  vp_token: string,
-  presentation_submission: {
-    id: string,
-    definition_id: string
-  }
-  // OR
-  id_token: string
+  vp_token: string
 }
 ```
 
@@ -284,8 +274,6 @@ registry.register(new CustomProtocolPlugin());
   protocol: 'mdoc-openid4vp',
   data: {
     doctype: 'org.iso.18013.5.1.mDL'
-    // OR
-    presentation_definition: {...}
   }
 }
 ```

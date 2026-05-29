@@ -9,7 +9,6 @@ This document describes the OpenID for Verifiable Presentations (OpenID4VP) prot
 - **Protocol ID**: `openid4vp`
 - **Specification**: [OpenID4VP 1.0](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html)
 - **Related Specs**: 
-  - [DIF Presentation Exchange 2.0](https://identity.foundation/presentation-exchange/spec/v2.0.0/)
   - [DCQL (Digital Credentials Query Language)](https://wicg.github.io/digital-credentials/)
 
 ## Architecture
@@ -81,8 +80,6 @@ openid4vp://?client_id=x509_san_dns:verifier.example.com
 - `response_uri`: Callback URL for the response
 - `nonce` (required): Prevents replay attacks
 - `state`: Maintains state between request and callback
-- `presentation_definition`: Inline presentation definition (JSON)
-- `presentation_definition_uri`: URL to fetch presentation definition
 - `client_metadata`: Verifier metadata (JSON)
 - `response_mode`: `direct_post` or `direct_post.jwt`
 - `dcql_query`: DCQL query for credential selection (JSON)
@@ -109,7 +106,7 @@ When `request_uri` is provided:
     "client_id": "x509_san_dns:verifier.example.com",
     "response_uri": "https://verifier.example.com/callback",
     "nonce": "abc123",
-    "presentation_definition": {...}
+    "dcql_query": {...}
   }
 }
 ```
@@ -130,40 +127,7 @@ The plugin validates `client_id` schemes:
    - Logged as warnings
    - May not be fully supported
 
-### Presentation Definition
-
-Based on [DIF Presentation Exchange 2.0](https://identity.foundation/presentation-exchange/):
-
-```json
-{
-  "id": "university-degree-verification",
-  "input_descriptors": [
-    {
-      "id": "degree-credential",
-      "format": {
-        "jwt_vc": {
-          "alg": ["ES256", "ES384"]
-        }
-      },
-      "constraints": {
-        "fields": [
-          {
-            "path": ["$.credentialSubject.degree.type"],
-            "filter": {
-              "type": "string",
-              "const": "BachelorDegree"
-            }
-          }
-        ]
-      }
-    }
-  ]
-}
-```
-
-### DCQL Query
-
-Digital Credentials Query Language for credential selection:
+### DCQL (Digital Credentials Query Language) for credential selection:
 
 ```json
 {
@@ -196,17 +160,6 @@ Digital Credentials Query Language for credential selection:
 ```javascript
 {
   "vp_token": "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "presentation_submission": {
-    "id": "submission-123",
-    "definition_id": "university-degree-verification",
-    "descriptor_map": [
-      {
-        "id": "degree-credential",
-        "format": "jwt_vp",
-        "path": "$"
-      }
-    ]
-  },
   "state": "original-state-value"
 }
 ```
@@ -223,21 +176,17 @@ Digital Credentials Query Language for credential selection:
 ```json
 {
   "vp_token": "eyJhbGciOiJFUzI1NiJ9...",
-  "presentation_submission": {...},
   "state": "..."
 }
 ```
 
-### Presentation Submission Validation
+### VP Token Validation
 
-The plugin validates that presentation submissions:
+The plugin validates that VP tokens:
 
-1. Have a unique `id`
-2. Reference the correct `definition_id`
-3. Include `descriptor_map` with:
-   - Descriptor `id` matching input descriptor
-   - Credential `format` (e.g., `jwt_vp`, `ldp_vp`, `mso_mdoc`)
-   - JSONPath to credential in VP token
+1. Are valid JWT or JSON-LD format
+2. Contain the requested credential claims
+3. Are properly signed
 
 ## wwWallet Integration Insights
 
@@ -249,9 +198,7 @@ The plugin validates that presentation submissions:
    - Optional SSL certificate pinning for enhanced security
 
 2. **Credential Matching** (`src/lib/services/OpenID4VP/OpenID4VP.ts:229-393`)
-   - Two matching strategies:
-     - Presentation Exchange (PEX) with JSONPath field matching
-     - DCQL with credential format and claims matching
+   - DCQL with credential format and claims matching
    - Supports multiple credential formats:
      - SD-JWT (Selective Disclosure JWT)
      - mDoc (ISO 18013-5 Mobile Documents)
@@ -316,16 +263,14 @@ const credential = await navigator.credentials.get({
         client_id: 'https://verifier.example.com',
         response_uri: 'https://verifier.example.com/callback',
         nonce: 'random-nonce-123',
-        presentation_definition: {
-          id: 'pd-1',
-          input_descriptors: [{
-            id: 'id-card',
-            format: { jwt_vc: { alg: ['ES256'] } },
-            constraints: {
-              fields: [{
-                path: ['$.credentialSubject.id']
-              }]
-            }
+        dcql_query: {
+          credentials: [{
+            id: 'org.example.identity',
+            format: 'vc+sd-jwt',
+            claims: [
+              { path: ['given_name'] },
+              { path: ['family_name'] }
+            ]
           }]
         }
       }
@@ -374,7 +319,6 @@ pnpm test tests/unit/content/dc-api/handlers/openid4vp.test.ts
 
 ### Specifications
 - [OpenID4VP 1.0](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html)
-- [DIF Presentation Exchange 2.0](https://identity.foundation/presentation-exchange/spec/v2.0.0/)
 - [DCQL Draft](https://wicg.github.io/digital-credentials/)
 - [RFC 9101 - JAR (JWT Secured Authorization Request)](https://www.rfc-editor.org/rfc/rfc9101.html)
 

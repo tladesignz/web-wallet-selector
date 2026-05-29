@@ -18,7 +18,7 @@ When a website requests credentials using the W3C Digital Credentials API, this 
 
 ## ✨ Key Features
 
-- **OpenID4VP Support** - Full implementation with JAR, Presentation Exchange, and DCQL
+- **OpenID4VP Support** - Full implementation with JAR and DCQL
 - **JWT Verification Callbacks** - Wallets provide their own signature verification
 - **Auto-Registration API** - Wallets can register themselves via JavaScript API
 - **Protocol-Aware** - Filters wallets by supported protocols
@@ -46,7 +46,13 @@ const credential = await navigator.credentials.get({
       request: {
         client_id: "https://verifier.example.com",
         response_type: "vp_token",
-        presentation_definition: { /* ... */ }
+        dcql_query: {
+          credentials: [{
+            id: "org.example.identity",
+            format: "vc+sd-jwt",
+            claims: [{ path: ["given_name"] }]
+          }]
+        }
       }
     }]
   }
@@ -78,7 +84,7 @@ if (window.WalletCompanion?.isInstalled) {
 ### ✅ Completed
 
 - W3C Digital Credentials API interception
-- OpenID4VP protocol (JAR, Presentation Exchange, DCQL)
+- OpenID4VP protocol (JAR, DCQL)
 - JWT verification callback system
 - Wallet auto-registration API
 - Protocol-aware wallet filtering
@@ -253,7 +259,6 @@ Copyright (c) 2025, SIROS Foundation
 
 - [W3C Digital Credentials API](https://w3c.github.io/digital-credentials/)
 - [OpenID4VP Specification](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html)
-- [Presentation Exchange v2.0](https://identity.foundation/presentation-exchange/spec/v2.0.0/)
 - [Chrome Extensions](https://developer.chrome.com/docs/extensions/)
 - [Firefox Extensions](https://extensionworkshop.com/)
 - [Safari Web Extensions](https://developer.apple.com/documentation/safariservices/safari_web_extensions)

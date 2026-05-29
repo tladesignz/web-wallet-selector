@@ -54,7 +54,6 @@ Comprehensive integration testing strategy for wallet auto-registration and JWT 
 ### 3. OpenID4VP Integration
 - ✅ Mock wallet handles OpenID4VP request
 - ✅ JAR request with mock JWT verification
-- ✅ Presentation Exchange credential selection
 - ✅ Response submission validation
 
 ### 4. Protocol Filtering
@@ -136,7 +135,7 @@ Jest/Puppeteer tests that:
 - Handle OpenID4VP authorization requests
 - Simulate credential selection
 - Generate mock vp_token
-- Return presentation_submission
+- Return response to verifier
 
 **Extend tests:**
 - Create mock verifier page

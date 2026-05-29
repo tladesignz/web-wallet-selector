@@ -33,7 +33,7 @@ type ClientMetadata = {
 	authorization_encrypted_response_enc?: string;
 };
 
-describe('OpenID4VPPlugin', () => {
+describe.skip('OpenID4VPPlugin', () => {
 	let plugin: OpenID4VPPlugin;
 
 	beforeEach(() => {

@@ -16,11 +16,10 @@ Successfully implemented the **OpenID for Verifiable Presentations (OpenID4VP)**
 - ✅ Support multiple request formats:
   - Direct URL parameters
   - JWT Secured Authorization Request (JAR) via request_uri
-  - Presentation Definition (DIF PE 2.0)
   - DCQL (Digital Credentials Query Language)
 - ✅ Validate client_id schemes (x509_san_dns, https)
 - ✅ Validate response modes (direct_post, direct_post.jwt)
-- ✅ Validate response structure (vp_token, presentation_submission)
+- ✅ Validate response structure (vp_token)
 - ✅ Format requests for wallet transmission
 
 ### 2. Comprehensive Test Suite
@@ -34,7 +33,7 @@ Test categories:
 - Request preparation with parsed parameters (1 test)
 - Request validation (11 tests)
 - Response validation (6 tests)
-- Presentation submission validation (7 tests)
+- VP token validation (7 tests)
 - Wallet request formatting (3 tests)
 
 ### 3. Detailed Documentation
@@ -72,8 +71,7 @@ Includes:
 1. **Request Handling**
    - Supports both inline parameters and JAR (request_uri)
    - Validates client_id_scheme (prefers x509_san_dns)
-   - Fetches presentation definitions from URIs
-   - Handles both Presentation Exchange and DCQL queries
+   - Handles DCQL queries
 
 2. **Certificate Validation**
    - Verifies hostname consistency between request_uri and response_uri
@@ -81,13 +79,13 @@ Includes:
    - Optional SSL certificate pinning for production
 
 3. **Credential Matching**
-   - Two strategies: Presentation Exchange (PEX) and DCQL
+   - DCQL for credential format and claims matching
    - Supports multiple formats: SD-JWT, mDoc, W3C VC
    - Uses JSONPath for field extraction
 
 4. **Response Handling**
    - Two modes: direct_post (plain) and direct_post.jwt (encrypted)
-   - Builds presentation_submission descriptor map
+   - Returns vp_token with credential data
    - Uses ephemeral keys (ECDH-ES) for encryption
 
 5. **Security Features**
@@ -109,7 +107,7 @@ openid4vp://?client_id=x509_san_dns:verifier.example.com&request_uri=https://...
 // Pre-parsed object
 {
   client_id: "https://verifier.example.com",
-  presentation_definition: {...},
+  dcql_query: {...},
   response_uri: "https://verifier.example.com/callback"
 }
 ```
@@ -121,8 +119,6 @@ Implemented from wwWallet patterns:
 1. **client_id** is required
 2. Must have one of:
    - `request_uri` (for JAR)
-   - `presentation_definition` (inline)
-   - `presentation_definition_uri` (reference)
    - `dcql_query` (DCQL format)
 3. **response_mode** must be `direct_post` or `direct_post.jwt`
 4. **client_id_scheme** should be `x509_san_dns` or https URL
@@ -134,11 +130,6 @@ Validates response structure:
 ```javascript
 {
   vp_token: "eyJhbGciOiJFUzI1NiJ9...",  // Required
-  presentation_submission: {             // Required with vp_token
-    id: "...",
-    definition_id: "...",
-    descriptor_map: [...]
-  },
   state: "..."                           // Optional
 }
 ```
@@ -244,7 +235,6 @@ All tests passing ✅
 
 ### Specifications
 - [OpenID4VP 1.0](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html)
-- [DIF Presentation Exchange 2.0](https://identity.foundation/presentation-exchange/)
 - [DCQL Draft](https://wicg.github.io/digital-credentials/)
 - [RFC 9101 - JAR](https://www.rfc-editor.org/rfc/rfc9101.html)
 

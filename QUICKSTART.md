@@ -17,17 +17,14 @@ const credential = await navigator.credentials.get({
         response_mode: "direct_post",
         response_uri: "https://verifier.example.com/callback",
         nonce: "n-0S6_WzA2Mj",
-        presentation_definition: {
-          id: "example-request",
-          input_descriptors: [{
-            id: "id_credential",
-            format: { jwt_vp: { alg: ["ES256"] } },
-            constraints: {
-              fields: [{
-                path: ["$.vc.type"],
-                filter: { type: "string", const: "IdentityCredential" }
-              }]
-            }
+        dcql_query: {
+          credentials: [{
+            id: "org.example.identity",
+            format: "vc+sd-jwt",
+            claims: [
+              { path: ["given_name"] },
+              { path: ["family_name"] }
+            ]
           }]
         }
       }
@@ -38,24 +35,7 @@ const credential = await navigator.credentials.get({
 
 ### OpenID4VP Request Formats
 
-**1. Direct Parameters (Inline)**
-
-```javascript
-const credential = await navigator.credentials.get({
-  digital: {
-    providers: [{
-      protocol: "openid4vp",
-      request: {
-        client_id: "https://verifier.example.com",
-        response_type: "vp_token",
-        presentation_definition: { /* Presentation Exchange v2 */ }
-      }
-    }]
-  }
-});
-```
-
-**2. JAR - JWT-secured Authorization Request (By Reference)**
+**1. JAR - JWT-secured Authorization Request (By Reference)**
 
 ```javascript
 const credential = await navigator.credentials.get({
@@ -71,7 +51,7 @@ const credential = await navigator.credentials.get({
 });
 ```
 
-**3. DCQL - Digital Credentials Query Language**
+**2. DCQL - Digital Credentials Query Language**
 
 ```javascript
 const credential = await navigator.credentials.get({
