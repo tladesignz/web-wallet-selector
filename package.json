@@ -43,6 +43,7 @@
   ],
   "dependencies": {
     "@fontsource/inter": "^5.2.8",
+    "@sirosfoundation/browser-log": "0.1.0-beta.1",
     "lucide": "^1.16.0",
     "valibot": "^1.4.1"
   },

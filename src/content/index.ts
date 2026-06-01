@@ -13,12 +13,13 @@ import {
 	type WalletSelectedMessage,
 } from '@shared/schemas/messages';
 import { RPC } from './rpc';
+import { logger } from '@shared/logger';
 
 async function sendMessage<M extends InboundMessage>(message: M): Promise<ResponseFor<M['type']>> {
 	return runtimeSendMessage(message) as Promise<ResponseFor<M['type']>>;
 }
 
-console.log('W3C Digital Credentials API Interceptor loaded');
+logger.debug('W3C Digital Credentials API Interceptor loaded');
 
 // Inject scripts into page context
 const script = document.createElement('script');
