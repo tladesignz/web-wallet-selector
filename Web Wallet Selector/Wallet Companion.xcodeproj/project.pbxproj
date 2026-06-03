@@ -17,8 +17,8 @@
 		A0444DDE2EE1CC4900E7155E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A0444DDC2EE1CC4900E7155E /* Main.storyboard */; };
 		A0444DE72EE1CC4900E7155E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0444DE62EE1CC4900E7155E /* AppDelegate.swift */; };
 		A0444DEA2EE1CC4900E7155E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A0444DE82EE1CC4900E7155E /* Main.storyboard */; };
-		A0444DF12EE1CC4900E7155E /* Web Wallet Selector Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A0444DF02EE1CC4900E7155E /* Web Wallet Selector Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		A0444DFB2EE1CC4900E7155E /* Web Wallet Selector Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A0444DFA2EE1CC4900E7155E /* Web Wallet Selector Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A0444DF12EE1CC4900E7155E /* Wallet Companion Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A0444DF02EE1CC4900E7155E /* Wallet Companion Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A0444DFB2EE1CC4900E7155E /* Wallet Companion Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A0444DFA2EE1CC4900E7155E /* Wallet Companion Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A0444E002EE1CC4900E7155E /* Main.html in Resources */ = {isa = PBXBuildFile; fileRef = A0444DC52EE1CC4800E7155E /* Main.html */; };
 		A0444E012EE1CC4900E7155E /* Main.html in Resources */ = {isa = PBXBuildFile; fileRef = A0444DC52EE1CC4800E7155E /* Main.html */; };
 		A0444E022EE1CC4900E7155E /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = A0444DC72EE1CC4800E7155E /* Icon.png */; };
@@ -83,7 +83,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				A0444DF12EE1CC4900E7155E /* Web Wallet Selector Extension.appex in Embed Foundation Extensions */,
+				A0444DF12EE1CC4900E7155E /* Wallet Companion Extension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -94,7 +94,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				A0444DFB2EE1CC4900E7155E /* Web Wallet Selector Extension.appex in Embed Foundation Extensions */,
+				A0444DFB2EE1CC4900E7155E /* Wallet Companion Extension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -114,19 +114,19 @@
 		A0444DCA2EE1CC4800E7155E /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		A0444DCB2EE1CC4900E7155E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A0444DCD2EE1CC4900E7155E /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
-		A0444DD22EE1CC4900E7155E /* Web Wallet Selector.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Web Wallet Selector.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A0444DD22EE1CC4900E7155E /* Wallet Companion.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Wallet Companion.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A0444DD52EE1CC4900E7155E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A0444DD72EE1CC4900E7155E /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		A0444DDA2EE1CC4900E7155E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		A0444DDD2EE1CC4900E7155E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		A0444DDF2EE1CC4900E7155E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		A0444DE42EE1CC4900E7155E /* Web Wallet Selector.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Web Wallet Selector.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A0444DE42EE1CC4900E7155E /* Wallet Companion.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Wallet Companion.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A0444DE62EE1CC4900E7155E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A0444DE92EE1CC4900E7155E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		A0444DEB2EE1CC4900E7155E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		A0444DF02EE1CC4900E7155E /* Web Wallet Selector Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Web Wallet Selector Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A0444DF02EE1CC4900E7155E /* Wallet Companion Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Wallet Companion Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A0444DF52EE1CC4900E7155E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		A0444DFA2EE1CC4900E7155E /* Web Wallet Selector Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Web Wallet Selector Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A0444DFA2EE1CC4900E7155E /* Wallet Companion Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Wallet Companion Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A0444DFF2EE1CC4900E7155E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A0444E1F2EE1CC4A00E7155E /* protocols.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = protocols.js; path = ../../safari/protocols.js; sourceTree = "<group>"; };
 		A0444E202EE1CC4A00E7155E /* popup.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = popup.js; path = ../../safari/popup.js; sourceTree = "<group>"; };
@@ -227,10 +227,10 @@
 		A0444DD32EE1CC4900E7155E /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A0444DD22EE1CC4900E7155E /* Web Wallet Selector.app */,
-				A0444DE42EE1CC4900E7155E /* Web Wallet Selector.app */,
-				A0444DF02EE1CC4900E7155E /* Web Wallet Selector Extension.appex */,
-				A0444DFA2EE1CC4900E7155E /* Web Wallet Selector Extension.appex */,
+				A0444DD22EE1CC4900E7155E /* Wallet Companion.app */,
+				A0444DE42EE1CC4900E7155E /* Wallet Companion.app */,
+				A0444DF02EE1CC4900E7155E /* Wallet Companion Extension.appex */,
+				A0444DFA2EE1CC4900E7155E /* Wallet Companion Extension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -296,9 +296,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		A0444DD12EE1CC4900E7155E /* Web Wallet Selector (iOS) */ = {
+		A0444DD12EE1CC4900E7155E /* Wallet Companion (iOS) */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A0444E142EE1CC4900E7155E /* Build configuration list for PBXNativeTarget "Web Wallet Selector (iOS)" */;
+			buildConfigurationList = A0444E142EE1CC4900E7155E /* Build configuration list for PBXNativeTarget "Wallet Companion (iOS)" */;
 			buildPhases = (
 				A0444DCE2EE1CC4900E7155E /* Sources */,
 				A0444DCF2EE1CC4900E7155E /* Frameworks */,
@@ -310,16 +310,16 @@
 			dependencies = (
 				A0444DF32EE1CC4900E7155E /* PBXTargetDependency */,
 			);
-			name = "Web Wallet Selector (iOS)";
+			name = "Wallet Companion (iOS)";
 			packageProductDependencies = (
 			);
 			productName = "Web Wallet Selector (iOS)";
-			productReference = A0444DD22EE1CC4900E7155E /* Web Wallet Selector.app */;
+			productReference = A0444DD22EE1CC4900E7155E /* Wallet Companion.app */;
 			productType = "com.apple.product-type.application";
 		};
-		A0444DE32EE1CC4900E7155E /* Web Wallet Selector (macOS) */ = {
+		A0444DE32EE1CC4900E7155E /* Wallet Companion (macOS) */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A0444E1B2EE1CC4900E7155E /* Build configuration list for PBXNativeTarget "Web Wallet Selector (macOS)" */;
+			buildConfigurationList = A0444E1B2EE1CC4900E7155E /* Build configuration list for PBXNativeTarget "Wallet Companion (macOS)" */;
 			buildPhases = (
 				A0444DE02EE1CC4900E7155E /* Sources */,
 				A0444DE12EE1CC4900E7155E /* Frameworks */,
@@ -331,16 +331,16 @@
 			dependencies = (
 				A0444DFD2EE1CC4900E7155E /* PBXTargetDependency */,
 			);
-			name = "Web Wallet Selector (macOS)";
+			name = "Wallet Companion (macOS)";
 			packageProductDependencies = (
 			);
 			productName = "Web Wallet Selector (macOS)";
-			productReference = A0444DE42EE1CC4900E7155E /* Web Wallet Selector.app */;
+			productReference = A0444DE42EE1CC4900E7155E /* Wallet Companion.app */;
 			productType = "com.apple.product-type.application";
 		};
-		A0444DEF2EE1CC4900E7155E /* Web Wallet Selector Extension (iOS) */ = {
+		A0444DEF2EE1CC4900E7155E /* Wallet Companion Extension (iOS) */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A0444E102EE1CC4900E7155E /* Build configuration list for PBXNativeTarget "Web Wallet Selector Extension (iOS)" */;
+			buildConfigurationList = A0444E102EE1CC4900E7155E /* Build configuration list for PBXNativeTarget "Wallet Companion Extension (iOS)" */;
 			buildPhases = (
 				A0444DEC2EE1CC4900E7155E /* Sources */,
 				A0444DED2EE1CC4900E7155E /* Frameworks */,
@@ -351,15 +351,16 @@
 			dependencies = (
 			);
 			name = "Web Wallet Selector Extension (iOS)";
+			name = "Web Wallet Selector Extension (iOS)";
 			packageProductDependencies = (
 			);
 			productName = "Web Wallet Selector Extension (iOS)";
-			productReference = A0444DF02EE1CC4900E7155E /* Web Wallet Selector Extension.appex */;
+			productReference = A0444DF02EE1CC4900E7155E /* Wallet Companion Extension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
-		A0444DF92EE1CC4900E7155E /* Web Wallet Selector Extension (macOS) */ = {
+		A0444DF92EE1CC4900E7155E /* Wallet Companion Extension (macOS) */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A0444E172EE1CC4900E7155E /* Build configuration list for PBXNativeTarget "Web Wallet Selector Extension (macOS)" */;
+			buildConfigurationList = A0444E172EE1CC4900E7155E /* Build configuration list for PBXNativeTarget "Wallet Companion Extension (macOS)" */;
 			buildPhases = (
 				A0444DF62EE1CC4900E7155E /* Sources */,
 				A0444DF72EE1CC4900E7155E /* Frameworks */,
@@ -373,7 +374,7 @@
 			packageProductDependencies = (
 			);
 			productName = "Web Wallet Selector Extension (macOS)";
-			productReference = A0444DFA2EE1CC4900E7155E /* Web Wallet Selector Extension.appex */;
+			productReference = A0444DFA2EE1CC4900E7155E /* Wallet Companion Extension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
@@ -402,7 +403,7 @@
 					};
 				};
 			};
-			buildConfigurationList = A0444DC22EE1CC4800E7155E /* Build configuration list for PBXProject "Web Wallet Selector" */;
+			buildConfigurationList = A0444DC22EE1CC4800E7155E /* Build configuration list for PBXProject "Wallet Companion" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -416,10 +417,10 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				A0444DD12EE1CC4900E7155E /* Web Wallet Selector (iOS) */,
-				A0444DE32EE1CC4900E7155E /* Web Wallet Selector (macOS) */,
-				A0444DEF2EE1CC4900E7155E /* Web Wallet Selector Extension (iOS) */,
-				A0444DF92EE1CC4900E7155E /* Web Wallet Selector Extension (macOS) */,
+				A0444DD12EE1CC4900E7155E /* Wallet Companion (iOS) */,
+				A0444DE32EE1CC4900E7155E /* Wallet Companion (macOS) */,
+				A0444DEF2EE1CC4900E7155E /* Wallet Companion Extension (iOS) */,
+				A0444DF92EE1CC4900E7155E /* Wallet Companion Extension (macOS) */,
 			);
 		};
 /* End PBXProject section */
@@ -537,12 +538,12 @@
 /* Begin PBXTargetDependency section */
 		A0444DF32EE1CC4900E7155E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = A0444DEF2EE1CC4900E7155E /* Web Wallet Selector Extension (iOS) */;
+			target = A0444DEF2EE1CC4900E7155E /* Wallet Companion Extension (iOS) */;
 			targetProxy = A0444DF22EE1CC4900E7155E /* PBXContainerItemProxy */;
 		};
 		A0444DFD2EE1CC4900E7155E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = A0444DF92EE1CC4900E7155E /* Web Wallet Selector Extension (macOS) */;
+			target = A0444DF92EE1CC4900E7155E /* Wallet Companion Extension (macOS) */;
 			targetProxy = A0444DFC2EE1CC4900E7155E /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -722,7 +723,7 @@
 					SafariServices,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "$(EXT_BUNDLE_ID)";
-				PRODUCT_NAME = "Web Wallet Selector Extension";
+				PRODUCT_NAME = "Wallet Companion Extension";
 				PROVISIONING_PROFILE_SPECIFIER = "$(IOS_EXT_PROVISIONING_PROFILE_SPECIFIER)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -755,7 +756,7 @@
 					SafariServices,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "$(EXT_BUNDLE_ID)";
-				PRODUCT_NAME = "Web Wallet Selector Extension";
+				PRODUCT_NAME = "Wallet Companion Extension";
 				PROVISIONING_PROFILE_SPECIFIER = "$(IOS_EXT_PROVISIONING_PROFILE_SPECIFIER)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -796,7 +797,7 @@
 					WebKit,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "$(APP_BUNDLE_ID)";
-				PRODUCT_NAME = "Web Wallet Selector";
+				PRODUCT_NAME = "Wallet Companion";
 				PROVISIONING_PROFILE_SPECIFIER = "$(IOS_APP_PROVISIONING_PROFILE_SPECIFIER)";
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -839,7 +840,7 @@
 					WebKit,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "$(APP_BUNDLE_ID)";
-				PRODUCT_NAME = "Web Wallet Selector";
+				PRODUCT_NAME = "Wallet Companion";
 				PROVISIONING_PROFILE_SPECIFIER = "$(IOS_APP_PROVISIONING_PROFILE_SPECIFIER)";
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -878,7 +879,7 @@
 					SafariServices,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "$(EXT_BUNDLE_ID)";
-				PRODUCT_NAME = "Web Wallet Selector Extension";
+				PRODUCT_NAME = "Wallet Companion Extension";
 				PROVISIONING_PROFILE_SPECIFIER = "$(MAC_EXT_PROVISIONING_PROFILE_SPECIFIER)";
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
@@ -914,7 +915,7 @@
 					SafariServices,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "$(EXT_BUNDLE_ID)";
-				PRODUCT_NAME = "Web Wallet Selector Extension";
+				PRODUCT_NAME = "Wallet Companion Extension";
 				PROVISIONING_PROFILE_SPECIFIER = "$(MAC_EXT_PROVISIONING_PROFILE_SPECIFIER)";
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
@@ -956,7 +957,7 @@
 					WebKit,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "$(APP_BUNDLE_ID)";
-				PRODUCT_NAME = "Web Wallet Selector";
+				PRODUCT_NAME = "Wallet Companion";
 				PROVISIONING_PROFILE_SPECIFIER = "$(MAC_APP_PROVISIONING_PROFILE_SPECIFIER)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = macosx;
@@ -1001,7 +1002,7 @@
 					WebKit,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "$(APP_BUNDLE_ID)";
-				PRODUCT_NAME = "Web Wallet Selector";
+				PRODUCT_NAME = "Wallet Companion";
 				PROVISIONING_PROFILE_SPECIFIER = "$(MAC_APP_PROVISIONING_PROFILE_SPECIFIER)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = macosx;
@@ -1018,7 +1019,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		A0444DC22EE1CC4800E7155E /* Build configuration list for PBXProject "Web Wallet Selector" */ = {
+		A0444DC22EE1CC4800E7155E /* Build configuration list for PBXProject "Wallet Companion" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A0444E0E2EE1CC4900E7155E /* Debug */,
@@ -1027,7 +1028,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A0444E102EE1CC4900E7155E /* Build configuration list for PBXNativeTarget "Web Wallet Selector Extension (iOS)" */ = {
+		A0444E102EE1CC4900E7155E /* Build configuration list for PBXNativeTarget "Wallet Companion Extension (iOS)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A0444E112EE1CC4900E7155E /* Debug */,
@@ -1036,7 +1037,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A0444E142EE1CC4900E7155E /* Build configuration list for PBXNativeTarget "Web Wallet Selector (iOS)" */ = {
+		A0444E142EE1CC4900E7155E /* Build configuration list for PBXNativeTarget "Wallet Companion (iOS)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A0444E152EE1CC4900E7155E /* Debug */,
@@ -1045,7 +1046,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A0444E172EE1CC4900E7155E /* Build configuration list for PBXNativeTarget "Web Wallet Selector Extension (macOS)" */ = {
+		A0444E172EE1CC4900E7155E /* Build configuration list for PBXNativeTarget "Wallet Companion Extension (macOS)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A0444E182EE1CC4900E7155E /* Debug */,
@@ -1054,7 +1055,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A0444E1B2EE1CC4900E7155E /* Build configuration list for PBXNativeTarget "Web Wallet Selector (macOS)" */ = {
+		A0444E1B2EE1CC4900E7155E /* Build configuration list for PBXNativeTarget "Wallet Companion (macOS)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A0444E1C2EE1CC4900E7155E /* Debug */,
