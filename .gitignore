@@ -49,3 +49,6 @@ node_modules/.cache/
 
 # Xcode
 xcuserdata/
+
+# Fastlane
+Wallet Companion/fastlane/metadata/review_information/

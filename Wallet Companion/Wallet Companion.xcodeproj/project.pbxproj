@@ -41,14 +41,14 @@
 			containerPortal = A0444DBF2EE1CC4800E7155E /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = A0444DEF2EE1CC4900E7155E;
-			remoteInfo = "Web Wallet Selector Extension (iOS)";
+			remoteInfo = "Wallet Companion Extension (iOS)";
 		};
 		A0444DFC2EE1CC4900E7155E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = A0444DBF2EE1CC4800E7155E /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = A0444DF92EE1CC4900E7155E;
-			remoteInfo = "Web Wallet Selector Extension (macOS)";
+			remoteInfo = "Wallet Companion Extension (macOS)";
 		};
 /* End PBXContainerItemProxy section */
 
@@ -81,8 +81,8 @@
 		A00D1D0F2F2B92D8002B5B4B /* Config.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Config.h; sourceTree = "<group>"; };
 		A00D1D102F2B92D8002B5B4B /* Config.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Config.m; sourceTree = "<group>"; };
 		A00D1D112F2B92D8002B5B4B /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
-		A00D1D162F2B92DB002B5B4B /* Web Wallet Selector (iOS)-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Web Wallet Selector (iOS)-Bridging-Header.h"; sourceTree = "<group>"; };
-		A00D1D172F2B92DB002B5B4B /* Web Wallet Selector (macOS)-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Web Wallet Selector (macOS)-Bridging-Header.h"; sourceTree = "<group>"; };
+		A00D1D162F2B92DB002B5B4B /* Wallet Companion (iOS)-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Wallet Companion (iOS)-Bridging-Header.h"; sourceTree = "<group>"; };
+		A00D1D172F2B92DB002B5B4B /* Wallet Companion (macOS)-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Wallet Companion (macOS)-Bridging-Header.h"; sourceTree = "<group>"; };
 		A0444DC62EE1CC4800E7155E /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = Base; path = Base.lproj/Main.html; sourceTree = "<group>"; };
 		A0444DC72EE1CC4800E7155E /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
 		A0444DC82EE1CC4800E7155E /* Style.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = Style.css; sourceTree = "<group>"; };
@@ -120,6 +120,11 @@
 			name = safari;
 			path = ../dist/safari;
 			sourceTree = SOURCE_ROOT;
+		};
+		A0AF8AF92FD6D38200D544C6 /* fastlane */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = fastlane;
+			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
@@ -160,6 +165,7 @@
 			children = (
 				A0AF89F72FD6C88800D544C6 /* README.md */,
 				A0AF8A8A2FD6CF7500D544C6 /* docs */,
+				A0AF8AF92FD6D38200D544C6 /* fastlane */,
 				A0DBB2A52EE2E68500109241 /* Config.xcconfig */,
 				A0444DC32EE1CC4800E7155E /* Shared (App) */,
 				A0444DCC2EE1CC4900E7155E /* Shared (Extension) */,
@@ -180,8 +186,8 @@
 				A00D1D112F2B92D8002B5B4B /* Config.swift */,
 				A0444DCB2EE1CC4900E7155E /* Assets.xcassets */,
 				A0444DC42EE1CC4800E7155E /* Resources */,
-				A00D1D162F2B92DB002B5B4B /* Web Wallet Selector (iOS)-Bridging-Header.h */,
-				A00D1D172F2B92DB002B5B4B /* Web Wallet Selector (macOS)-Bridging-Header.h */,
+				A00D1D162F2B92DB002B5B4B /* Wallet Companion (iOS)-Bridging-Header.h */,
+				A00D1D172F2B92DB002B5B4B /* Wallet Companion (macOS)-Bridging-Header.h */,
 			);
 			path = "Shared (App)";
 			sourceTree = "<group>";
@@ -284,7 +290,7 @@
 			name = "Wallet Companion (iOS)";
 			packageProductDependencies = (
 			);
-			productName = "Web Wallet Selector (iOS)";
+			productName = "Wallet Companion (iOS)";
 			productReference = A0444DD22EE1CC4900E7155E /* Wallet Companion.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -305,13 +311,13 @@
 			name = "Wallet Companion (macOS)";
 			packageProductDependencies = (
 			);
-			productName = "Web Wallet Selector (macOS)";
+			productName = "Wallet Companion (macOS)";
 			productReference = A0444DE42EE1CC4900E7155E /* Wallet Companion.app */;
 			productType = "com.apple.product-type.application";
 		};
-		A0444DEF2EE1CC4900E7155E /* Web Wallet Selector Extension (iOS) */ = {
+		A0444DEF2EE1CC4900E7155E /* Wallet Companion Extension (iOS) */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A0444E102EE1CC4900E7155E /* Build configuration list for PBXNativeTarget "Web Wallet Selector Extension (iOS)" */;
+			buildConfigurationList = A0444E102EE1CC4900E7155E /* Build configuration list for PBXNativeTarget "Wallet Companion Extension (iOS)" */;
 			buildPhases = (
 				A0444DEC2EE1CC4900E7155E /* Sources */,
 				A0444DED2EE1CC4900E7155E /* Frameworks */,
@@ -324,16 +330,16 @@
 			fileSystemSynchronizedGroups = (
 				A0AF8AB02FD6D0BC00D544C6 /* safari */,
 			);
-			name = "Web Wallet Selector Extension (iOS)";
+			name = "Wallet Companion Extension (iOS)";
 			packageProductDependencies = (
 			);
-			productName = "Web Wallet Selector Extension (iOS)";
+			productName = "Wallet Companion Extension (iOS)";
 			productReference = A0444DF02EE1CC4900E7155E /* Wallet Companion Extension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
-		A0444DF92EE1CC4900E7155E /* Web Wallet Selector Extension (macOS) */ = {
+		A0444DF92EE1CC4900E7155E /* Wallet Companion Extension (macOS) */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A0444E172EE1CC4900E7155E /* Build configuration list for PBXNativeTarget "Web Wallet Selector Extension (macOS)" */;
+			buildConfigurationList = A0444E172EE1CC4900E7155E /* Build configuration list for PBXNativeTarget "Wallet Companion Extension (macOS)" */;
 			buildPhases = (
 				A0444DF62EE1CC4900E7155E /* Sources */,
 				A0444DF72EE1CC4900E7155E /* Frameworks */,
@@ -346,10 +352,10 @@
 			fileSystemSynchronizedGroups = (
 				A0AF8AB02FD6D0BC00D544C6 /* safari */,
 			);
-			name = "Web Wallet Selector Extension (macOS)";
+			name = "Wallet Companion Extension (macOS)";
 			packageProductDependencies = (
 			);
-			productName = "Web Wallet Selector Extension (macOS)";
+			productName = "Wallet Companion Extension (macOS)";
 			productReference = A0444DFA2EE1CC4900E7155E /* Wallet Companion Extension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
@@ -395,8 +401,8 @@
 			targets = (
 				A0444DD12EE1CC4900E7155E /* Wallet Companion (iOS) */,
 				A0444DE32EE1CC4900E7155E /* Wallet Companion (macOS) */,
-				A0444DEF2EE1CC4900E7155E /* Web Wallet Selector Extension (iOS) */,
-				A0444DF92EE1CC4900E7155E /* Web Wallet Selector Extension (macOS) */,
+				A0444DEF2EE1CC4900E7155E /* Wallet Companion Extension (iOS) */,
+				A0444DF92EE1CC4900E7155E /* Wallet Companion Extension (macOS) */,
 			);
 		};
 /* End PBXProject section */
@@ -490,12 +496,12 @@
 /* Begin PBXTargetDependency section */
 		A0444DF32EE1CC4900E7155E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = A0444DEF2EE1CC4900E7155E /* Web Wallet Selector Extension (iOS) */;
+			target = A0444DEF2EE1CC4900E7155E /* Wallet Companion Extension (iOS) */;
 			targetProxy = A0444DF22EE1CC4900E7155E /* PBXContainerItemProxy */;
 		};
 		A0444DFD2EE1CC4900E7155E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = A0444DF92EE1CC4900E7155E /* Web Wallet Selector Extension (macOS) */;
+			target = A0444DF92EE1CC4900E7155E /* Wallet Companion Extension (macOS) */;
 			targetProxy = A0444DFC2EE1CC4900E7155E /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -662,7 +668,7 @@
 				CODE_SIGN_STYLE = Manual;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "iOS (Extension)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Web Wallet Selector Extension";
+				INFOPLIST_KEY_CFBundleDisplayName = "Wallet Companion Extension";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -695,7 +701,7 @@
 				CODE_SIGN_STYLE = Manual;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "iOS (Extension)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Web Wallet Selector Extension";
+				INFOPLIST_KEY_CFBundleDisplayName = "Wallet Companion Extension";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -731,7 +737,7 @@
 				CODE_SIGN_STYLE = Manual;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "iOS (App)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Web Wallet Selector";
+				INFOPLIST_KEY_CFBundleDisplayName = "Wallet Companion";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -756,7 +762,7 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "Shared (App)/Web Wallet Selector (iOS)-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "Shared (App)/Wallet Companion (iOS)-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
@@ -774,7 +780,7 @@
 				CODE_SIGN_STYLE = Manual;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "iOS (App)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Web Wallet Selector";
+				INFOPLIST_KEY_CFBundleDisplayName = "Wallet Companion";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -799,7 +805,7 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "Shared (App)/Web Wallet Selector (iOS)-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "Shared (App)/Wallet Companion (iOS)-Bridging-Header.h";
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -818,7 +824,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "macOS (Extension)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Web Wallet Selector Extension";
+				INFOPLIST_KEY_CFBundleDisplayName = "Wallet Companion Extension";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -854,7 +860,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "macOS (Extension)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Web Wallet Selector Extension";
+				INFOPLIST_KEY_CFBundleDisplayName = "Wallet Companion Extension";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -894,7 +900,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "macOS (App)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Web Wallet Selector";
+				INFOPLIST_KEY_CFBundleDisplayName = "Wallet Companion";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -917,7 +923,7 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "Shared (App)/Web Wallet Selector (macOS)-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "Shared (App)/Wallet Companion (macOS)-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
@@ -939,7 +945,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "macOS (App)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Web Wallet Selector";
+				INFOPLIST_KEY_CFBundleDisplayName = "Wallet Companion";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -962,7 +968,7 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "Shared (App)/Web Wallet Selector (macOS)-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "Shared (App)/Wallet Companion (macOS)-Bridging-Header.h";
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 			};
@@ -980,7 +986,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A0444E102EE1CC4900E7155E /* Build configuration list for PBXNativeTarget "Web Wallet Selector Extension (iOS)" */ = {
+		A0444E102EE1CC4900E7155E /* Build configuration list for PBXNativeTarget "Wallet Companion Extension (iOS)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A0444E112EE1CC4900E7155E /* Debug */,
@@ -998,7 +1004,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A0444E172EE1CC4900E7155E /* Build configuration list for PBXNativeTarget "Web Wallet Selector Extension (macOS)" */ = {
+		A0444E172EE1CC4900E7155E /* Build configuration list for PBXNativeTarget "Wallet Companion Extension (macOS)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A0444E182EE1CC4900E7155E /* Debug */,
