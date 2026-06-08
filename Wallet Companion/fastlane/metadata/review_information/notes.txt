@@ -1,0 +1,39 @@
+This extension polyfills the W3C Digital Credentials API to enable OpenID 4 Verifiable Presentations in Safari with *Web wallets*.
+
+Source Code:
+https://github.com/sirosfoundation/wallet-companion
+
+TypeScript source provided. Build uses Vite. No minification or obfuscation.
+
+Build Instructions:
+
+1. Install pnpm 10.4.0+ and Node.js 22+
+2. Run: pnpm install
+3. Run: pnpm build:safari
+4. Output is in `dist/safari/` and will be used in the `/Wallet Companion/` Xcode project.
+
+
+Testing with Mock Fixtures (Recommended):
+The repository includes mock wallet and verifier pages for testing without external dependencies:
+
+1. Build and install the extension
+2. Start the test server: pnpm test:server (serves on http://localhost:3456)
+3. Open http://localhost:3456/mock-wallet.html, click "Register Wallet"
+4. Open http://localhost:3456/mock-verifier.html, click any test scenario (e.g., "Basic Identity")
+5. The wallet selector modal should appear
+6. Select the mock wallet, approve in mock wallet, response returns to verifier
+
+
+Testing with Production Wallet:
+
+1. Build and install the extension
+2. Visit https://id.siros.org and sign in, wallet registers automatically
+3. Visit a verifier site that requests credentials (or use the mock verifier above)
+4. The wallet selector should show "SIROS ID"
+5. Selecting it opens SIROS ID to approve the request
+
+
+Permissions Justification:
+
+* storage: Store the user's registered wallet configurations
+* <all_urls>: Polyfill the DC API on all pages (verifiers can be any domain)

@@ -51,4 +51,6 @@ node_modules/.cache/
 xcuserdata/
 
 # Fastlane
-Wallet Companion/fastlane/metadata/review_information/
+Wallet Companion/fastlane/report.xml
+Wallet Companion/fastlane/metadata/review_information/*
+!Wallet Companion/fastlane/metadata/review_information/notes.txt
