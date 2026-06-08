@@ -3,7 +3,7 @@
  */
 
 import { logger } from '@shared/logger';
-import { runtimeSendMessage } from '@shared/runtime';
+import { getEntryURL, runtimeSendMessage } from '@shared/runtime';
 import {
 	type CheckWalletMessage,
 	type InboundMessage,
@@ -23,7 +23,7 @@ logger.debug('W3C Digital Credentials API Interceptor loaded');
 
 // Inject scripts into page context
 const script = document.createElement('script');
-script.src = chrome.runtime.getURL('content/inject.js');
+script.src = getEntryURL('src/content/inject.ts');
 script.onload = (e) => (e.target as HTMLScriptElement).remove();
 (document.head || document.documentElement).appendChild(script);
 

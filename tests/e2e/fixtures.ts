@@ -99,7 +99,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
 			const pages = context.pages();
 			const warmupPage = pages[0] || (await context.newPage());
 			try {
-				await warmupPage.goto(`chrome-extension://${extensionId}/ui/popup.html`, {
+				await warmupPage.goto(`chrome-extension://${extensionId}/popup.html`, {
 					waitUntil: 'domcontentloaded',
 					timeout: 5000,
 				});

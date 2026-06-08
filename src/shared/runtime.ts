@@ -45,3 +45,9 @@ export async function runtimeOnMessage<T>(
 		chrome.runtime.onMessage.addListener(listener);
 	}
 }
+
+export function getEntryURL(entry: string) {
+	const { __meta } = chrome.runtime.getManifest();
+
+	return chrome.runtime.getURL(__meta.entries[entry]);
+}

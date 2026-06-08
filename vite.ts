@@ -1,11 +1,11 @@
 import { InlineConfig, build as viteBuild } from 'vite';
 import { readFileSync, watch } from 'node:fs';
-import { resolve, dirname } from 'node:path';
+import { resolve, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 import { CHROME_MANIFEST, FIREFOX_MANIFEST, SAFARI_MANIFEST } from './manifests';
 import { type BrowserManifest } from './manifests/resources';
-import { writeFile } from 'node:fs/promises';
+import { readdir, readFile, rm, unlink, writeFile } from 'node:fs/promises';
 
 process.env.VITE_APP_VERSION = process.env.npm_package_version ?? '0.0.0';
 
@@ -81,9 +81,9 @@ async function build({
 				input,
 				output: {
 					format,
-					entryFileNames: '[name].js',
-					chunkFileNames: 'chunks/[name]--[hash].js',
-					assetFileNames: 'assets/[name]--[hash].[ext]',
+					entryFileNames: '[name]--[hash].js',
+					chunkFileNames: '[name]--[hash].js',
+					assetFileNames: '[name]--[hash].[ext]',
 					codeSplitting: format !== 'iife',
 				},
 			},
@@ -106,13 +106,46 @@ async function build({
 
 				for (const [key, entry] of browserManifest.getCollectedEntries()) {
 					if (entry.source.endsWith('.html')) {
-						browserManifest.collectEntryOutputFile(key, entry.source.slice((projectPrefix + 'src/').length));
+						const htmlPath = entry.source
+							.slice((projectPrefix + 'src/').length)
+							.split('/')
+							.pop();
+
+						if (!htmlPath) throw new Error('Failed to get html path');
+
+						browserManifest.collectEntryOutputFile(key, htmlPath);
 					}
 				}
 
 				for (const [key, icons] of browserManifest.getCollectedIcons()) {
 					const generated = await generateIcons(__dirname, icons.source, iconSizes, this);
 					browserManifest.collectIconOutputFiles(key, generated);
+				}
+			},
+			async closeBundle() {
+				const files = await readdir(outDir, { withFileTypes: true, recursive: true });
+				for (const f of files) {
+					if (!f.isFile() || !f.name.endsWith('.html')) continue;
+
+					const src = resolve(f.parentPath, f.name);
+
+					if (dirname(src) === outDir) continue;
+
+					const depth = relative(outDir, src).split('/').length - 1;
+        			const prefix = '../'.repeat(depth);
+					const html = (await readFile(src, 'utf-8'))
+        				.replaceAll(`"${prefix}`, '"./')
+        				.replaceAll(`'${prefix}`, "'./");
+
+					await writeFile(resolve(outDir, f.name), html);
+
+					await unlink(src);
+
+					const dir = dirname(src);
+					const remaining = await readdir(dir);
+					if (remaining.length === 0) {
+						await rm(dir, { recursive: true });
+					}
 				}
 			},
 		}],
@@ -144,7 +177,13 @@ async function build({
 	}
 
 	const manifest = browserManifest.generateManifest();
-	await writeFile(resolve(outDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
+	const manifestWithAssets = {
+		...manifest,
+		__meta: {
+			entries: browserManifest.getEntryMap(),
+		}
+	};
+	await writeFile(resolve(outDir, 'manifest.json'), JSON.stringify(manifestWithAssets, null, 2));
 }
 
 /**

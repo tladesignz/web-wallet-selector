@@ -12,14 +12,14 @@ test.describe('Extension Loading', () => {
 
 	test('extension popup should be accessible', async ({ extensionContext, extensionId }) => {
 		const page = await extensionContext.newPage();
-		await page.goto(`chrome-extension://${extensionId}/ui/popup.html`);
+		await page.goto(`chrome-extension://${extensionId}/popup.html`);
 		await expect(page.locator('body')).toBeVisible();
 		await page.close();
 	});
 
 	test('extension options page should be accessible', async ({ extensionContext, extensionId }) => {
 		const page = await extensionContext.newPage();
-		await page.goto(`chrome-extension://${extensionId}/ui/options.html`);
+		await page.goto(`chrome-extension://${extensionId}/options.html`);
 		await expect(page.locator('body')).toBeVisible();
 		await page.close();
 	});
