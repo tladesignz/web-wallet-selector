@@ -187,7 +187,7 @@ See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md#packaging) for release details.
        v
 ┌─────────────────────────────────────┐
 │  Extension (inject.js)              │
-│  - Intercepts DC API calls          │
+│  - Polyfills DC API                 │
 │  - Exposes window.WalletCompanion   │
 └──────┬──────────────────────────────┘
        │

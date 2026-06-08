@@ -10,7 +10,7 @@ Complete API reference for the Wallet Companion extension.
 
 ## Digital Credentials API (Verifier Side)
 
-The extension intercepts standard W3C Digital Credentials API calls. Websites request credentials using the native browser API.
+The extension polyfills the W3C Digital Credentials API for cross-browser support. Websites request credentials using the standard browser API.
 
 ### Basic Request
 
