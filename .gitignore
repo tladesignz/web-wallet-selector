@@ -9,12 +9,6 @@ dist/
 *.xpi
 *.crx
 
-# Browser extension build directories (built from src/)
-# Only manifest.json files are hand-maintained and tracked
-chrome/
-firefox/
-safari/
-
 # Source generated icons (regenerated from SVG)
 src/icons/icon*.png
 

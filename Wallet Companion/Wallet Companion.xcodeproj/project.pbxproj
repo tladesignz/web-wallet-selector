@@ -33,30 +33,6 @@
 		A0444E0B2EE1CC4900E7155E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A0444DCB2EE1CC4900E7155E /* Assets.xcassets */; };
 		A0444E0C2EE1CC4900E7155E /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0444DCD2EE1CC4900E7155E /* SafariWebExtensionHandler.swift */; };
 		A0444E0D2EE1CC4900E7155E /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0444DCD2EE1CC4900E7155E /* SafariWebExtensionHandler.swift */; };
-		A0444E2B2EE1CC4A00E7155E /* protocols.js in Resources */ = {isa = PBXBuildFile; fileRef = A0444E1F2EE1CC4A00E7155E /* protocols.js */; };
-		A0444E2C2EE1CC4A00E7155E /* popup.js in Resources */ = {isa = PBXBuildFile; fileRef = A0444E202EE1CC4A00E7155E /* popup.js */; };
-		A0444E2D2EE1CC4A00E7155E /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = A0444E212EE1CC4A00E7155E /* background.js */; };
-		A0444E2E2EE1CC4A00E7155E /* popup.html in Resources */ = {isa = PBXBuildFile; fileRef = A0444E222EE1CC4A00E7155E /* popup.html */; };
-		A0444E2F2EE1CC4A00E7155E /* options.js in Resources */ = {isa = PBXBuildFile; fileRef = A0444E232EE1CC4A00E7155E /* options.js */; };
-		A0444E302EE1CC4A00E7155E /* icons in Resources */ = {isa = PBXBuildFile; fileRef = A0444E242EE1CC4A00E7155E /* icons */; };
-		A0444E312EE1CC4A00E7155E /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = A0444E252EE1CC4A00E7155E /* manifest.json */; };
-		A0444E322EE1CC4A00E7155E /* options.html in Resources */ = {isa = PBXBuildFile; fileRef = A0444E262EE1CC4A00E7155E /* options.html */; };
-		A0444E332EE1CC4A00E7155E /* inject.js in Resources */ = {isa = PBXBuildFile; fileRef = A0444E272EE1CC4A00E7155E /* inject.js */; };
-		A0444E342EE1CC4A00E7155E /* content.js in Resources */ = {isa = PBXBuildFile; fileRef = A0444E282EE1CC4A00E7155E /* content.js */; };
-		A0444E352EE1CC4A00E7155E /* modal.js in Resources */ = {isa = PBXBuildFile; fileRef = A0444E292EE1CC4A00E7155E /* modal.js */; };
-		A0444E362EE1CC4A00E7155E /* protocols in Resources */ = {isa = PBXBuildFile; fileRef = A0444E2A2EE1CC4A00E7155E /* protocols */; };
-		A0444E372EE1CC4A00E7155E /* protocols.js in Resources */ = {isa = PBXBuildFile; fileRef = A0444E1F2EE1CC4A00E7155E /* protocols.js */; };
-		A0444E382EE1CC4A00E7155E /* popup.js in Resources */ = {isa = PBXBuildFile; fileRef = A0444E202EE1CC4A00E7155E /* popup.js */; };
-		A0444E392EE1CC4A00E7155E /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = A0444E212EE1CC4A00E7155E /* background.js */; };
-		A0444E3A2EE1CC4A00E7155E /* popup.html in Resources */ = {isa = PBXBuildFile; fileRef = A0444E222EE1CC4A00E7155E /* popup.html */; };
-		A0444E3B2EE1CC4A00E7155E /* options.js in Resources */ = {isa = PBXBuildFile; fileRef = A0444E232EE1CC4A00E7155E /* options.js */; };
-		A0444E3C2EE1CC4A00E7155E /* icons in Resources */ = {isa = PBXBuildFile; fileRef = A0444E242EE1CC4A00E7155E /* icons */; };
-		A0444E3D2EE1CC4A00E7155E /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = A0444E252EE1CC4A00E7155E /* manifest.json */; };
-		A0444E3E2EE1CC4A00E7155E /* options.html in Resources */ = {isa = PBXBuildFile; fileRef = A0444E262EE1CC4A00E7155E /* options.html */; };
-		A0444E3F2EE1CC4A00E7155E /* inject.js in Resources */ = {isa = PBXBuildFile; fileRef = A0444E272EE1CC4A00E7155E /* inject.js */; };
-		A0444E402EE1CC4A00E7155E /* content.js in Resources */ = {isa = PBXBuildFile; fileRef = A0444E282EE1CC4A00E7155E /* content.js */; };
-		A0444E412EE1CC4A00E7155E /* modal.js in Resources */ = {isa = PBXBuildFile; fileRef = A0444E292EE1CC4A00E7155E /* modal.js */; };
-		A0444E422EE1CC4A00E7155E /* protocols in Resources */ = {isa = PBXBuildFile; fileRef = A0444E2A2EE1CC4A00E7155E /* protocols */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -128,20 +104,24 @@
 		A0444DF52EE1CC4900E7155E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A0444DFA2EE1CC4900E7155E /* Wallet Companion Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Wallet Companion Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A0444DFF2EE1CC4900E7155E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		A0444E1F2EE1CC4A00E7155E /* protocols.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = protocols.js; path = ../../safari/protocols.js; sourceTree = "<group>"; };
-		A0444E202EE1CC4A00E7155E /* popup.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = popup.js; path = ../../safari/popup.js; sourceTree = "<group>"; };
-		A0444E212EE1CC4A00E7155E /* background.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = background.js; path = ../../safari/background.js; sourceTree = "<group>"; };
-		A0444E222EE1CC4A00E7155E /* popup.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = popup.html; path = ../../safari/popup.html; sourceTree = "<group>"; };
-		A0444E232EE1CC4A00E7155E /* options.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = options.js; path = ../../safari/options.js; sourceTree = "<group>"; };
-		A0444E242EE1CC4A00E7155E /* icons */ = {isa = PBXFileReference; lastKnownFileType = folder; name = icons; path = ../../safari/icons; sourceTree = "<group>"; };
-		A0444E252EE1CC4A00E7155E /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = manifest.json; path = ../../safari/manifest.json; sourceTree = "<group>"; };
-		A0444E262EE1CC4A00E7155E /* options.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = options.html; path = ../../safari/options.html; sourceTree = "<group>"; };
-		A0444E272EE1CC4A00E7155E /* inject.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = inject.js; path = ../../safari/inject.js; sourceTree = "<group>"; };
-		A0444E282EE1CC4A00E7155E /* content.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = content.js; path = ../../safari/content.js; sourceTree = "<group>"; };
-		A0444E292EE1CC4A00E7155E /* modal.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = modal.js; path = ../../safari/modal.js; sourceTree = "<group>"; };
-		A0444E2A2EE1CC4A00E7155E /* protocols */ = {isa = PBXFileReference; lastKnownFileType = folder; name = protocols; path = ../../safari/protocols; sourceTree = "<group>"; };
+		A0AF89F72FD6C88800D544C6 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = SOURCE_ROOT; };
 		A0DBB2A52EE2E68500109241 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		A0AF8A8A2FD6CF7500D544C6 /* docs */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			name = docs;
+			path = ../docs;
+			sourceTree = SOURCE_ROOT;
+		};
+		A0AF8AB02FD6D0BC00D544C6 /* safari */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			name = safari;
+			path = ../dist/safari;
+			sourceTree = SOURCE_ROOT;
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		A0444DCF2EE1CC4900E7155E /* Frameworks */ = {
@@ -178,6 +158,8 @@
 		A0444DBE2EE1CC4800E7155E = {
 			isa = PBXGroup;
 			children = (
+				A0AF89F72FD6C88800D544C6 /* README.md */,
+				A0AF8A8A2FD6CF7500D544C6 /* docs */,
 				A0DBB2A52EE2E68500109241 /* Config.xcconfig */,
 				A0444DC32EE1CC4800E7155E /* Shared (App) */,
 				A0444DCC2EE1CC4900E7155E /* Shared (Extension) */,
@@ -276,18 +258,7 @@
 		A0444E1E2EE1CC4A00E7155E /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				A0444E1F2EE1CC4A00E7155E /* protocols.js */,
-				A0444E202EE1CC4A00E7155E /* popup.js */,
-				A0444E212EE1CC4A00E7155E /* background.js */,
-				A0444E222EE1CC4A00E7155E /* popup.html */,
-				A0444E232EE1CC4A00E7155E /* options.js */,
-				A0444E242EE1CC4A00E7155E /* icons */,
-				A0444E252EE1CC4A00E7155E /* manifest.json */,
-				A0444E262EE1CC4A00E7155E /* options.html */,
-				A0444E272EE1CC4A00E7155E /* inject.js */,
-				A0444E282EE1CC4A00E7155E /* content.js */,
-				A0444E292EE1CC4A00E7155E /* modal.js */,
-				A0444E2A2EE1CC4A00E7155E /* protocols */,
+				A0AF8AB02FD6D0BC00D544C6 /* safari */,
 			);
 			name = Resources;
 			path = "Shared (Extension)";
@@ -338,9 +309,9 @@
 			productReference = A0444DE42EE1CC4900E7155E /* Wallet Companion.app */;
 			productType = "com.apple.product-type.application";
 		};
-		A0444DEF2EE1CC4900E7155E /* Wallet Companion Extension (iOS) */ = {
+		A0444DEF2EE1CC4900E7155E /* Web Wallet Selector Extension (iOS) */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A0444E102EE1CC4900E7155E /* Build configuration list for PBXNativeTarget "Wallet Companion Extension (iOS)" */;
+			buildConfigurationList = A0444E102EE1CC4900E7155E /* Build configuration list for PBXNativeTarget "Web Wallet Selector Extension (iOS)" */;
 			buildPhases = (
 				A0444DEC2EE1CC4900E7155E /* Sources */,
 				A0444DED2EE1CC4900E7155E /* Frameworks */,
@@ -350,7 +321,9 @@
 			);
 			dependencies = (
 			);
-			name = "Web Wallet Selector Extension (iOS)";
+			fileSystemSynchronizedGroups = (
+				A0AF8AB02FD6D0BC00D544C6 /* safari */,
+			);
 			name = "Web Wallet Selector Extension (iOS)";
 			packageProductDependencies = (
 			);
@@ -358,9 +331,9 @@
 			productReference = A0444DF02EE1CC4900E7155E /* Wallet Companion Extension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
-		A0444DF92EE1CC4900E7155E /* Wallet Companion Extension (macOS) */ = {
+		A0444DF92EE1CC4900E7155E /* Web Wallet Selector Extension (macOS) */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A0444E172EE1CC4900E7155E /* Build configuration list for PBXNativeTarget "Wallet Companion Extension (macOS)" */;
+			buildConfigurationList = A0444E172EE1CC4900E7155E /* Build configuration list for PBXNativeTarget "Web Wallet Selector Extension (macOS)" */;
 			buildPhases = (
 				A0444DF62EE1CC4900E7155E /* Sources */,
 				A0444DF72EE1CC4900E7155E /* Frameworks */,
@@ -369,6 +342,9 @@
 			buildRules = (
 			);
 			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				A0AF8AB02FD6D0BC00D544C6 /* safari */,
 			);
 			name = "Web Wallet Selector Extension (macOS)";
 			packageProductDependencies = (
@@ -419,8 +395,8 @@
 			targets = (
 				A0444DD12EE1CC4900E7155E /* Wallet Companion (iOS) */,
 				A0444DE32EE1CC4900E7155E /* Wallet Companion (macOS) */,
-				A0444DEF2EE1CC4900E7155E /* Wallet Companion Extension (iOS) */,
-				A0444DF92EE1CC4900E7155E /* Wallet Companion Extension (macOS) */,
+				A0444DEF2EE1CC4900E7155E /* Web Wallet Selector Extension (iOS) */,
+				A0444DF92EE1CC4900E7155E /* Web Wallet Selector Extension (macOS) */,
 			);
 		};
 /* End PBXProject section */
@@ -457,18 +433,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A0444E372EE1CC4A00E7155E /* protocols.js in Resources */,
-				A0444E3D2EE1CC4A00E7155E /* manifest.json in Resources */,
-				A0444E422EE1CC4A00E7155E /* protocols in Resources */,
-				A0444E3A2EE1CC4A00E7155E /* popup.html in Resources */,
-				A0444E3E2EE1CC4A00E7155E /* options.html in Resources */,
-				A0444E402EE1CC4A00E7155E /* content.js in Resources */,
-				A0444E392EE1CC4A00E7155E /* background.js in Resources */,
-				A0444E3C2EE1CC4A00E7155E /* icons in Resources */,
-				A0444E382EE1CC4A00E7155E /* popup.js in Resources */,
-				A0444E3B2EE1CC4A00E7155E /* options.js in Resources */,
-				A0444E412EE1CC4A00E7155E /* modal.js in Resources */,
-				A0444E3F2EE1CC4A00E7155E /* inject.js in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -476,18 +440,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A0444E2B2EE1CC4A00E7155E /* protocols.js in Resources */,
-				A0444E312EE1CC4A00E7155E /* manifest.json in Resources */,
-				A0444E362EE1CC4A00E7155E /* protocols in Resources */,
-				A0444E2E2EE1CC4A00E7155E /* popup.html in Resources */,
-				A0444E322EE1CC4A00E7155E /* options.html in Resources */,
-				A0444E342EE1CC4A00E7155E /* content.js in Resources */,
-				A0444E2D2EE1CC4A00E7155E /* background.js in Resources */,
-				A0444E302EE1CC4A00E7155E /* icons in Resources */,
-				A0444E2C2EE1CC4A00E7155E /* popup.js in Resources */,
-				A0444E2F2EE1CC4A00E7155E /* options.js in Resources */,
-				A0444E352EE1CC4A00E7155E /* modal.js in Resources */,
-				A0444E332EE1CC4A00E7155E /* inject.js in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -538,12 +490,12 @@
 /* Begin PBXTargetDependency section */
 		A0444DF32EE1CC4900E7155E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = A0444DEF2EE1CC4900E7155E /* Wallet Companion Extension (iOS) */;
+			target = A0444DEF2EE1CC4900E7155E /* Web Wallet Selector Extension (iOS) */;
 			targetProxy = A0444DF22EE1CC4900E7155E /* PBXContainerItemProxy */;
 		};
 		A0444DFD2EE1CC4900E7155E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = A0444DF92EE1CC4900E7155E /* Wallet Companion Extension (macOS) */;
+			target = A0444DF92EE1CC4900E7155E /* Web Wallet Selector Extension (macOS) */;
 			targetProxy = A0444DFC2EE1CC4900E7155E /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -1028,7 +980,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A0444E102EE1CC4900E7155E /* Build configuration list for PBXNativeTarget "Wallet Companion Extension (iOS)" */ = {
+		A0444E102EE1CC4900E7155E /* Build configuration list for PBXNativeTarget "Web Wallet Selector Extension (iOS)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A0444E112EE1CC4900E7155E /* Debug */,
@@ -1046,7 +998,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A0444E172EE1CC4900E7155E /* Build configuration list for PBXNativeTarget "Wallet Companion Extension (macOS)" */ = {
+		A0444E172EE1CC4900E7155E /* Build configuration list for PBXNativeTarget "Web Wallet Selector Extension (macOS)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A0444E182EE1CC4900E7155E /* Debug */,
