@@ -62,11 +62,18 @@ make dev-firefox
 
 ### Safari
 
+- Enable Safari -> Settings -> Advanced -> Show features for web developers
+- Enable Safari -> Settings -> Developer -> Extensions -> Allow unsigned extensions
+- `open Wallet\ Companion/Wallet\ Companion.xcodeproj`
+- Run "Wallet Companion (macOS)" scheme on "My Mac"
+- In the app, press "Quit and Open Safari Settings…"
+- Activate the "Wallet Companion" extension.
+
+If you **really, really have to rebuild the Xcode project** (Don't!): 
+
 ```bash
 make dev-safari
 ```
-
-Follow the printed conversion and Xcode steps.
 
 ## Testing
 

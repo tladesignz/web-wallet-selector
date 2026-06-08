@@ -73,9 +73,13 @@ dev-firefox: ## Run Firefox with extension
 	pnpm dev:firefox
 
 dev-safari: build-safari ## Safari setup instructions
-	@echo "1. xcrun safari-web-extension-converter $(DIST)/safari/ --app-name 'Wallet Companion'"
-	@echo "2. Open Xcode project and run"
-	@echo "3. Enable in Safari Preferences > Extensions"
+	@echo "1. Enable Safari -> Settings -> Advanced -> Show features for web developers"
+	@echo "2. Enable Safari -> Settings -> Developer -> Extensions -> Allow unsigned extensions"
+	@echo "3. xcrun safari-web-extension-converter $(DIST)/safari/ --app-name 'Wallet Companion'"
+	@echo "4. open Wallet\ Companion/Wallet\ Companion.xcodeproj"
+	@echo "5. Run 'Wallet Companion (macOS) scheme on 'My Mac'"
+	@echo "6. In the app, press 'Quit and Open Safari Settings…'"
+	@echo "7. Enable extension in Safari -> Settings > Extensions"
 
 # Quality
 lint: ## Run linter
